@@ -1,0 +1,1666 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Immuno Ops · Design System de Produto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Teko:wght@500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<style>
+
+/* ============================================================
+   TOKENS
+   ============================================================ */
+:root{
+  /* --- superfície --- */
+  --bg: #080C08;
+  --bg-raised: #0E140E;
+  --bg-header: #131B13;
+  --border: #1E2A1E;
+  --border-strong: #2C3D2C;
+
+  /* --- texto --- */
+  --text: #FFFFFF;
+  --text-secondary: #8FA893;
+  --text-tertiary: #5C7060;
+
+  /* --- ação --- */
+  --action: #00FF41;
+  --action-hover: #00CC33;
+  --on-action: #080C08;
+
+  /* --- estado semântico --- */
+  --healthy: #5C7060;
+  --warning: #FFB020;
+  --critical: #FF5B4F;
+  --info: #35D6FF;
+  --savings: #00FF41;
+
+  /* --- série de gráfico: identidade, nunca estado --- */
+  --series-1: #58C7F3;
+  --series-2: #7C83F7;
+  --series-3: #C77DFF;
+  --series-4: #5FD3A6;
+  --series-5: #F07AB0;
+  --series-6: #B79A6E;
+  --series-rest: #4A5C4E;
+  --grid: #16211A;
+
+  /* --- tipografia --- */
+  --font-display: 'Teko', 'Oswald', 'Arial Narrow', sans-serif;
+  --font-ui: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Space Mono', ui-monospace, 'SF Mono', Consolas, monospace;
+
+  /* --- espaçamento (base 4, ritmo 8) --- */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+  --sp-8: 64px;
+
+  /* --- raio: mínimo, instrumento não é SaaS card --- */
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-none: 0;
+
+  /* --- motion: funcional, curto --- */
+  --dur-fast: 100ms;
+  --dur-base: 160ms;
+  --ease: cubic-bezier(.2,.6,.2,1);
+}
+
+*{ box-sizing: border-box; }
+:root{ color-scheme: dark; }
+html{ scroll-behavior: smooth; }
+body{
+  margin:0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+@media (prefers-reduced-motion: reduce){
+  html{ scroll-behavior:auto; }
+  *{ animation-duration:.001ms !important; transition-duration:.001ms !important; }
+}
+
+::selection{ background: var(--action); color: var(--on-action); }
+
+/* focus visível em tudo, sempre */
+a:focus-visible, button:focus-visible, input:focus-visible,
+select:focus-visible, [tabindex]:focus-visible{
+  outline: 2px solid var(--action);
+  outline-offset: 2px;
+}
+
+/* ============================================================ LAYOUT */
+.shell{ display:grid; grid-template-columns: 248px minmax(0, 1fr); min-height:100vh; }
+
+.side{
+  position: sticky; top:0; align-self:start; height:100vh;
+  overflow-y:auto; border-right:1px solid var(--border);
+  background: var(--bg-header);
+  padding: var(--sp-5) var(--sp-4) var(--sp-8);
+}
+.side::-webkit-scrollbar{ width:6px; }
+.side::-webkit-scrollbar-thumb{ background: var(--border-strong); }
+
+.brand{ display:flex; align-items:center; gap:2px; margin-bottom: var(--sp-1); }
+.brand-mark{ color:var(--text); font-family:var(--font-ui); font-weight:800; letter-spacing:.02em; font-size:.92rem; }
+.brand-mark em{ color: var(--action); font-style:normal; }
+.brand-sub{ font-family:var(--font-mono); font-size:.66rem; letter-spacing:.09em; text-transform:uppercase; color:var(--text-tertiary); margin: 0 0 var(--sp-6); }
+
+.nav-group{ margin-bottom: var(--sp-5); }
+.nav-group-label{
+  font-family: var(--font-mono); font-size:.66rem; letter-spacing:.09em;
+  text-transform: uppercase; color: var(--text-tertiary);
+  margin: 0 0 var(--sp-2); display:block;
+}
+.nav-link{
+  display:block; padding: 6px var(--sp-2); margin: 0 calc(var(--sp-2) * -1);
+  border-radius: var(--radius-sm); color: var(--text-secondary);
+  text-decoration:none; font-size:.86rem; border-left: 2px solid transparent;
+  transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+}
+.nav-link:hover{ color: var(--text); }
+.nav-link.is-active{ color: var(--action); border-left-color: var(--action); background: rgba(0,255,65,.06); }
+
+.main{ padding: var(--sp-8) var(--sp-8) calc(var(--sp-8) * 2); max-width: 1180px; }
+
+.hero{ margin-bottom: var(--sp-8); padding-bottom: var(--sp-6); border-bottom:1px solid var(--border); }
+.hero-tag{ font-family:var(--font-mono); font-size:.72rem; letter-spacing:.09em; text-transform:uppercase; color:var(--action); margin:0 0 var(--sp-3); }
+.hero h1{ font-family:var(--font-ui); font-weight:800; font-size:2.5rem; letter-spacing:-.035em; margin:0 0 var(--sp-3); }
+.hero p{ color: var(--text-secondary); max-width: 62ch; margin:0 0 var(--sp-4); font-size:1rem; }
+.hero-meta{ display:flex; gap: var(--sp-5); flex-wrap:wrap; font-family:var(--font-mono); font-size:.78rem; color:var(--text-tertiary); }
+.hero-meta b{ color: var(--text-secondary); font-weight:400; }
+
+section.doc-section{ margin-bottom: var(--sp-8); scroll-margin-top: var(--sp-5); }
+.section-eyebrow{ font-family:var(--font-mono); font-size:.72rem; letter-spacing:.09em; text-transform:uppercase; color:var(--text-tertiary); margin:0 0 var(--sp-1); }
+.section-eyebrow b{ color: var(--action); font-weight:400; }
+h2.section-title{ font-family:var(--font-ui); font-weight:800; font-size:1.75rem; letter-spacing:-.032em; margin: 0 0 var(--sp-3); }
+h3.sub-title{ font-family:var(--font-ui); font-weight:800; font-size:1.28rem; letter-spacing:-.02em; margin: var(--sp-6) 0 var(--sp-2); }
+.section-intro{ color: var(--text-secondary); max-width: 68ch; margin: 0 0 var(--sp-5); }
+.section-intro strong{ color: var(--text); font-weight:600; }
+
+/* ============================================================ GRID DE CARTELAS */
+.grid{ display:grid; gap: var(--sp-3); }
+.grid > *{ min-width:0; }
+.grid.cols-2{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid.cols-3{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.grid.cols-4{ grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.grid.cols-5{ grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.grid.cols-6{ grid-template-columns: repeat(6, minmax(0, 1fr)); }
+@media (max-width: 900px){
+  .grid.cols-4, .grid.cols-3, .grid.cols-5, .grid.cols-6{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* swatch de cor — clique copia o hex */
+.swatch{
+  border:1px solid var(--border); border-radius: var(--radius-md); overflow:hidden;
+  background: var(--bg-raised); cursor:pointer; text-align:left; padding:0;
+  font-family: inherit; color:inherit;
+}
+.swatch-fill{ height:64px; border-bottom:1px solid var(--border); }
+.swatch-body{ padding: var(--sp-2) var(--sp-3) var(--sp-3); }
+.swatch-name{ font-size:.82rem; font-weight:600; margin:0 0 2px; }
+.swatch-token{ font-family: var(--font-mono); font-size:.72rem; color: var(--action); display:block; margin-bottom:2px; }
+.swatch-hex{ font-family: var(--font-mono); font-size:.74rem; color: var(--text-tertiary); }
+.swatch-use{ font-size:.76rem; color: var(--text-secondary); margin-top:4px; }
+.swatch.copied .swatch-hex::after{ content:' · copiado'; color: var(--action); }
+
+/* tipografia specimen */
+.type-row{ display:grid; grid-template-columns: 140px minmax(0,1fr) 220px; gap: var(--sp-4); align-items:baseline; padding: var(--sp-4) 0; border-top:1px solid var(--border); }
+.type-row:first-of-type{ border-top:none; }
+.type-label{ font-family: var(--font-mono); font-size:.72rem; letter-spacing:.07em; text-transform:uppercase; color: var(--text-tertiary); }
+.type-spec{ font-family: var(--font-mono); font-size:.76rem; color: var(--text-secondary); text-align:right; }
+
+/* ============================================================ ESTADOS — grade de demonstração */
+.state-demo{ display:grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: var(--sp-3); margin: var(--sp-3) 0 var(--sp-6); }
+@media (max-width: 1050px){ .state-demo{ grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.state-cell{ display:flex; flex-direction:column; gap: var(--sp-2); align-items:flex-start; min-width:0; }
+.state-cell-label{ font-family: var(--font-mono); font-size:.66rem; letter-spacing:.09em; text-transform:uppercase; color: var(--text-tertiary); }
+
+/* ---- botão ---- */
+.btn{
+  font-family: var(--font-ui); font-weight:700; font-size:.86rem;
+  padding: 10px 18px; border-radius: var(--radius-sm); border:1px solid transparent;
+  cursor:pointer; display:inline-flex; align-items:center; gap:8px;
+  transition: background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+}
+.btn-primary{ background: var(--action); color: var(--on-action); }
+.btn-primary.is-hover{ background: var(--action-hover); }
+.btn-primary.is-active{ background: var(--action-hover); transform: scale(.98); }
+.btn-primary.is-disabled{ background: var(--border-strong); color: var(--text-tertiary); cursor:not-allowed; }
+.btn-primary.is-loading{ background: var(--action-hover); color: transparent; position:relative; }
+
+.btn-secondary{ background: transparent; color: var(--text); border-color: var(--border-strong); }
+.btn-secondary.is-hover{ border-color: var(--action); color: var(--action); }
+.btn-secondary.is-active{ border-color: var(--action); color:var(--action); transform: scale(.98); }
+.btn-secondary.is-disabled{ color: var(--text-tertiary); border-color: var(--border); cursor:not-allowed; }
+.btn-secondary.is-loading{ color: transparent; position:relative; }
+
+.btn-ghost{ background:transparent; color: var(--text-secondary); padding-left:8px; padding-right:8px; }
+.btn-ghost.is-hover{ color: var(--text); background: var(--bg-raised); }
+
+.is-focus{ outline:2px solid var(--action); outline-offset:2px; }
+
+.spinner{
+  width:14px; height:14px; border-radius:50%; border:2px solid rgba(8,12,8,.35);
+  border-top-color: var(--on-action); position:absolute; left:50%; top:50%;
+  margin:-7px 0 0 -7px; animation: spin .7s linear infinite;
+}
+.btn-secondary .spinner{ border:2px solid rgba(255,255,255,.2); border-top-color: var(--text); }
+@keyframes spin{ to{ transform: rotate(360deg); } }
+
+/* ---- campo ---- */
+.field{ display:flex; flex-direction:column; gap:6px; width:100%; }
+.field-label{ font-family: var(--font-mono); font-size:.7rem; letter-spacing:.08em; text-transform:uppercase; color: var(--text-secondary); }
+.field-input{
+  font-family: var(--font-ui); font-size:.88rem; color: var(--text);
+  background: var(--bg-raised); border:1px solid var(--border-strong);
+  border-radius: var(--radius-sm); padding: 9px 12px;
+  transition: border-color var(--dur-fast) var(--ease);
+}
+.field-input.is-hover{ border-color: #3A4E3A; }
+.field-input.is-focus{ border-color: var(--action); outline:none; box-shadow: 0 0 0 3px rgba(0,255,65,.14); }
+.field-input.is-disabled{ color: var(--text-tertiary); background: var(--bg-header); cursor:not-allowed; }
+.field-input.is-loading{ color: transparent; background: linear-gradient(90deg, var(--bg-raised) 0%, var(--bg-header) 50%, var(--bg-raised) 100%); background-size: 200% 100%; animation: shimmer 1.4s infinite; }
+.field-hint{ font-size:.76rem; color: var(--text-tertiary); }
+.field-hint.error{ color: var(--critical); }
+
+/* ---- badge de estado ---- */
+.badge{
+  display:inline-flex; align-items:center; gap:6px;
+  font-family: var(--font-mono); font-size:.72rem; font-weight:700; letter-spacing:.04em;
+  padding: 4px 9px; border-radius: var(--radius-sm); border:1px solid transparent;
+}
+.badge-dot{ width:6px; height:6px; border-radius:50%; flex:none; }
+.badge.healthy{ color: var(--healthy); background: rgba(92,112,96,.12); border-color: rgba(92,112,96,.3); }
+.badge.healthy .badge-dot{ background: var(--healthy); }
+.badge.warning{ color: var(--warning); background: rgba(255,176,32,.1); border-color: rgba(255,176,32,.32); }
+.badge.warning .badge-dot{ background: var(--warning); }
+.badge.critical{ color: var(--critical); background: rgba(255,91,79,.1); border-color: rgba(255,91,79,.32); }
+.badge.critical .badge-dot{ background: var(--critical); }
+.badge.info{ color: var(--info); background: rgba(53,214,255,.1); border-color: rgba(53,214,255,.3); }
+.badge.info .badge-dot{ background: var(--info); }
+.badge.savings{ color: var(--on-action); background: var(--action); border-color: var(--action); }
+.badge.savings .badge-dot{ background: var(--on-action); }
+
+/* ---- painel / card ---- */
+.panel{ background: var(--bg-raised); border:1px solid var(--border); border-radius: var(--radius-md); padding: var(--sp-5); }
+.panel-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom: var(--sp-4); }
+.panel-title{ font-weight:700; font-size:.96rem; margin:0; }
+
+/* card clicável (linha de workload etc.) */
+.click-card{
+  display:block; width:100%; text-align:left; background: var(--bg-raised);
+  border:1px solid var(--border); border-radius: var(--radius-md); padding: var(--sp-4);
+  cursor:pointer; transition: border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+}
+.click-card.is-hover{ border-color: var(--border-strong); background: #10170f; }
+.click-card.is-focus{ border-color: var(--action); }
+.click-card.is-active{ background: var(--bg-header); }
+.click-card.is-disabled{ opacity:.45; cursor:not-allowed; }
+
+/* card de insight — padrão canônico da seção 07, reaplicado */
+.insight-card{ background: var(--bg-raised); border:1px solid rgba(255,91,79,.28); border-left:3px solid var(--critical); border-radius: var(--radius-md); padding: var(--sp-5); }
+.insight-top{ display:flex; align-items:center; gap:8px; margin-bottom: var(--sp-2); }
+.insight-service{ font-family: var(--font-mono); font-size:.76rem; color: var(--text-secondary); }
+.insight-title{ font-weight:700; font-size:1rem; margin: 0 0 6px; }
+.insight-body{ color: var(--text-secondary); font-size:.88rem; max-width:60ch; margin:0 0 var(--sp-4); }
+.insight-foot{ display:flex; gap: var(--sp-6); border-top:1px solid var(--border); padding-top: var(--sp-3); }
+.insight-metric-label{ font-family: var(--font-mono); font-size:.68rem; letter-spacing:.07em; text-transform:uppercase; color: var(--text-tertiary); margin-bottom:2px; }
+.insight-metric-value{ font-family: var(--font-mono); font-weight:700; font-size:.96rem; font-variant-numeric: tabular-nums; }
+.insight-metric-value.savings{ color: var(--action); }
+
+/* ---- cabeçalho de página ---- */
+.page-header{ border-bottom:1px solid var(--border); padding-bottom: var(--sp-4); margin-bottom: var(--sp-4); }
+.breadcrumb{ font-family: var(--font-mono); font-size:.74rem; color: var(--text-tertiary); margin: 0 0 var(--sp-2); }
+.breadcrumb a{ color: var(--text-tertiary); text-decoration:none; }
+.breadcrumb a:hover{ color: var(--text-secondary); }
+.breadcrumb .sep{ margin: 0 6px; }
+.breadcrumb .current{ color: var(--text-secondary); }
+.page-header-row{ display:flex; align-items:center; justify-content:space-between; gap: var(--sp-4); }
+.page-title-block h3{ margin:0 0 4px; }
+.page-title-sub{ color: var(--text-tertiary); font-size:.84rem; margin:0; }
+
+/* ---- tabela densa ---- */
+.data-table{ width:100%; border-collapse:collapse; font-size:.86rem; }
+.data-table thead th{
+  font-family: var(--font-mono); font-size:.68rem; letter-spacing:.07em; text-transform:uppercase;
+  color: var(--text-tertiary); text-align:left; padding: var(--sp-2) var(--sp-3);
+  background: var(--bg-header); border-bottom:1px solid var(--border-strong);
+}
+.data-table thead th.num{ text-align:right; }
+.data-table tbody td{ padding: var(--sp-3); border-bottom:1px solid var(--border); vertical-align:middle; }
+.data-table tbody td.num{ text-align:right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.data-table tbody tr{ transition: background var(--dur-fast) var(--ease); }
+.data-table tbody tr:hover{ background: var(--bg-raised); cursor:pointer; }
+.data-table tbody tr:last-child td{ border-bottom:none; }
+.row-name{ font-weight:600; }
+.row-sub{ display:block; font-size:.78rem; color: var(--text-tertiary); font-weight:400; }
+
+/* ---- estado vazio / erro ---- */
+.state-block{ text-align:center; padding: var(--sp-8) var(--sp-5); border:1px dashed var(--border-strong); border-radius: var(--radius-md); }
+.state-block-icon{ width:40px; height:40px; margin: 0 auto var(--sp-3); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family: var(--font-mono); font-weight:700; }
+.state-block.empty .state-block-icon{ background: var(--bg-header); color: var(--text-tertiary); }
+.state-block.error .state-block-icon{ background: rgba(255,91,79,.1); color: var(--critical); }
+.state-block h4{ margin: 0 0 var(--sp-2); font-size:.98rem; }
+.state-block p{ color: var(--text-secondary); font-size:.86rem; max-width:44ch; margin: 0 auto var(--sp-4); }
+
+/* ---- skeleton ---- */
+@keyframes shimmer{ 0%{ background-position: 200% 0; } 100%{ background-position: -200% 0; } }
+.skel{ background: linear-gradient(90deg, var(--bg-raised) 0%, var(--bg-header) 50%, var(--bg-raised) 100%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: var(--radius-sm); }
+.skel-line{ height:12px; margin-bottom:8px; }
+.skel-line.w-60{ width:60%; }
+.skel-line.w-40{ width:40%; }
+.skel-line.w-90{ width:90%; }
+
+/* ---- banner de dado não-real ---- */
+.mock-banner{
+  display:flex; align-items:center; gap: var(--sp-3);
+  background: repeating-linear-gradient(135deg, rgba(53,214,255,.05), rgba(53,214,255,.05) 8px, rgba(53,214,255,.09) 8px, rgba(53,214,255,.09) 16px);
+  border:1px solid rgba(53,214,255,.35); border-radius: var(--radius-md);
+  padding: var(--sp-3) var(--sp-4); font-size:.84rem;
+}
+.mock-banner-tag{ font-family: var(--font-mono); font-size:.68rem; letter-spacing:.07em; font-weight:700; color: var(--info); border:1px solid rgba(53,214,255,.4); border-radius: var(--radius-sm); padding: 2px 7px; flex:none; }
+.mock-banner span{ color: var(--text-secondary); }
+
+/* conteúdo largo rola dentro do próprio container — o body nunca rola na horizontal */
+.main{ min-width:0; overflow-x: clip; }
+.spec-table, .data-table{ display:block; overflow-x:auto; }
+.spec-table tbody, .data-table tbody, .spec-table thead, .data-table thead{ display:table; width:100%; }
+.spec-table td, .data-table td, .spec-table th, .data-table th{ overflow-wrap:anywhere; }
+.icon-card{ min-width:0; }
+.icon-card > span{ min-width:0; }
+.icon-card-name, .icon-card-use{ overflow-wrap:anywhere; }
+.tabs{ overflow-x:auto; scrollbar-width:none; }
+.tabs::-webkit-scrollbar{ display:none; }
+.chart-legend{ min-width:0; }
+.legend-item{ min-width:0; }
+.spark-row{ min-width:0; }
+.spark-name{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+/* ---- doc table (spec tables) ---- */
+.spec-table{ width:100%; border-collapse:collapse; margin: var(--sp-3) 0 var(--sp-5); font-size:.86rem; }
+.spec-table th{ text-align:left; font-family: var(--font-mono); font-size:.68rem; letter-spacing:.07em; text-transform:uppercase; color: var(--text-tertiary); padding: var(--sp-2) var(--sp-3); border-bottom:1px solid var(--border-strong); }
+.spec-table td{ padding: var(--sp-3); border-bottom:1px solid var(--border); color: var(--text-secondary); vertical-align:top; }
+.spec-table td:first-child{ color: var(--text); font-weight:600; }
+.spec-table code{ font-family: var(--font-mono); font-size:.82rem; background: var(--bg-header); padding:1px 6px; border-radius: var(--radius-sm); color: var(--action); }
+
+/* ---- breakpoint / spacing visual scale ---- */
+.scale-row{ display:flex; align-items:center; gap: var(--sp-3); padding: var(--sp-2) 0; border-top:1px solid var(--border); }
+.scale-row:first-of-type{ border-top:none; }
+.scale-name{ width:90px; font-family: var(--font-mono); font-size:.78rem; color: var(--text-secondary); flex:none; }
+.scale-bar{ height:10px; background: var(--action); border-radius:1px; opacity:.8; }
+.scale-val{ font-family: var(--font-mono); font-size:.76rem; color: var(--text-tertiary); flex:none; }
+
+.bp-card{ background: var(--bg-raised); border:1px solid var(--border); border-radius: var(--radius-md); padding: var(--sp-4); }
+.bp-name{ font-weight:700; font-size:.92rem; margin: 0 0 2px; }
+.bp-range{ font-family: var(--font-mono); font-size:.76rem; color: var(--text-tertiary); margin:0 0 var(--sp-2); }
+.bp-desc{ font-size:.82rem; color: var(--text-secondary); margin:0; }
+
+/* microcopy examples */
+.copy-pair{ display:grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: var(--sp-4); margin-bottom: var(--sp-3); }
+.copy-bad, .copy-good{ padding: var(--sp-3) var(--sp-4); border-radius: var(--radius-md); font-size:.86rem; }
+.copy-bad{ background: rgba(255,91,79,.06); border:1px solid rgba(255,91,79,.25); color: var(--text-secondary); }
+.copy-good{ background: rgba(0,255,65,.05); border:1px solid rgba(0,255,65,.22); color: var(--text-secondary); }
+.copy-tag{ display:block; font-family: var(--font-mono); font-size:.66rem; letter-spacing:.07em; text-transform:uppercase; margin-bottom:6px; }
+.copy-bad .copy-tag{ color: var(--critical); }
+.copy-good .copy-tag{ color: var(--action); }
+.copy-text{ color: var(--text); font-weight:500; }
+
+/* ============================================================ ÍCONE (Phosphor) */
+.ph, [class*=" ph-"], [class^="ph-"]{ color: currentColor; flex:none; line-height:1; }
+.icon-14{ font-size:14px; } .icon-16{ font-size:16px; } .icon-20{ font-size:20px; }
+.icon-24{ font-size:24px; } .icon-40{ font-size:40px; }
+.icon-card{ background: var(--bg-raised); border:1px solid var(--border); border-radius: var(--radius-md); padding: var(--sp-3); display:flex; align-items:center; gap: var(--sp-3); }
+.icon-card i{ font-size:20px; color: var(--text-secondary); }
+.icon-card-name{ font-family: var(--font-mono); font-size:.72rem; color: var(--text); display:block; }
+.icon-card-use{ font-size:.74rem; color: var(--text-tertiary); }
+
+/* --- vitrines de ícone --- */
+.icon-weight{ display:flex; flex-direction:column; align-items:center; gap:6px; background: var(--bg-raised); border:1px solid var(--border); border-radius: var(--radius-md); padding: var(--sp-4) var(--sp-2); }
+.icon-weight i{ font-size:28px; color: var(--text); }
+.icon-weight.is-banned i{ color: var(--critical); opacity:.55; }
+.icon-weight-name{ font-family: var(--font-mono); font-size:.7rem; letter-spacing:.07em; text-transform:uppercase; color: var(--text-secondary); }
+.icon-weight-use{ font-size:.72rem; color: var(--text-tertiary); text-align:center; line-height:1.4; }
+.icon-weight.is-banned .icon-weight-name{ color: var(--critical); text-decoration: line-through; }
+
+.icon-sizes{ display:flex; align-items:flex-end; gap: var(--sp-6); flex-wrap:wrap; background: var(--bg-raised); border:1px solid var(--border); border-radius: var(--radius-md); padding: var(--sp-5); }
+.icon-size{ display:flex; flex-direction:column; align-items:center; gap: var(--sp-2); }
+.icon-size i{ color: var(--text); }
+.icon-size span{ font-family: var(--font-mono); font-size:.68rem; color: var(--text-tertiary); }
+
+.icon-ctx{ display:flex; flex-direction:column; gap: var(--sp-2); }
+.icon-ctx-label{ font-family: var(--font-mono); font-size:.66rem; letter-spacing:.09em; text-transform:uppercase; color: var(--text-tertiary); }
+
+/* ============================================================ REGRA (proibido / adotado) */
+.rule{ border-radius: var(--radius-md); padding: var(--sp-4) var(--sp-5); margin: var(--sp-3) 0 var(--sp-5); }
+.rule-tag{ display:inline-flex; align-items:center; gap:6px; font-family: var(--font-mono); font-size:.68rem; letter-spacing:.09em; text-transform:uppercase; font-weight:700; margin-bottom: var(--sp-2); }
+.rule p{ margin:0; color: var(--text-secondary); font-size:.88rem; max-width:66ch; }
+.rule.forbid{ background: rgba(255,91,79,.06); border:1px solid rgba(255,91,79,.3); border-left:3px solid var(--critical); }
+.rule.forbid .rule-tag{ color: var(--critical); }
+.rule.adopt{ background: rgba(0,255,65,.045); border:1px solid rgba(0,255,65,.24); border-left:3px solid var(--action); }
+.rule.adopt .rule-tag{ color: var(--action); }
+
+/* ============================================================ TABS */
+.tabs{ display:flex; gap: var(--sp-1); border-bottom:1px solid var(--border); }
+.tab{
+  display:inline-flex; align-items:center; gap:8px; min-height:40px; padding: 0 var(--sp-3);
+  background:none; border:none; border-bottom:2px solid transparent; margin-bottom:-1px;
+  font-family: var(--font-mono); font-size:.72rem; letter-spacing:.09em; text-transform:uppercase;
+  color: var(--text-tertiary); cursor:pointer;
+  transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+}
+.tab:hover, .tab.is-hover{ color: var(--text); }
+.tab.is-selected{ color: var(--action); border-bottom-color: var(--action); }
+.tab.is-disabled{ color: var(--border-strong); cursor:not-allowed; }
+.tab-count{ font-variant-numeric: tabular-nums; font-weight:700; color: var(--text-secondary); }
+.tab.is-selected .tab-count{ color: var(--action); }
+.tab.is-disabled .tab-count{ color: var(--border-strong); }
+
+/* ============================================================ CHIP */
+.chip{
+  display:inline-flex; align-items:center; gap:6px; height:26px; padding: 0 var(--sp-2) 0 10px;
+  background: var(--bg-header); border:1px solid var(--border-strong); border-radius: var(--radius-sm);
+  font-family: var(--font-mono); font-size:.72rem; color: var(--text-secondary); cursor:pointer;
+  transition: border-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+}
+.chip:hover, .chip.is-hover{ color: var(--text); border-color: #3A4E3A; }
+.chip.is-selected{ color: var(--action); border-color: var(--action); background: rgba(0,255,65,.08); }
+.chip.is-disabled{ color: var(--text-tertiary); border-color: var(--border); cursor:not-allowed; opacity:.6; }
+.chip.is-loading{ color: transparent; position:relative; }
+.chip.is-loading .spinner{ width:11px; height:11px; margin:-5.5px 0 0 -5.5px; border-width:2px; border-color: rgba(255,255,255,.18); border-top-color: var(--text-secondary); }
+.chip i{ font-size:12px; opacity:.7; }
+.chip:hover i{ opacity:1; }
+.chip-key{ color: var(--text-tertiary); }
+
+/* ============================================================ DROPDOWN */
+.select{ position:relative; width:100%; }
+.select-trigger{
+  display:flex; align-items:center; justify-content:space-between; gap: var(--sp-2); width:100%;
+  font-family: var(--font-ui); font-size:.88rem; color: var(--text); text-align:left;
+  background: var(--bg-raised); border:1px solid var(--border-strong);
+  border-radius: var(--radius-sm); padding: 9px 10px 9px 12px; min-height:40px; cursor:pointer;
+  transition: border-color var(--dur-fast) var(--ease);
+}
+.select-trigger i{ color: var(--text-tertiary); font-size:14px; }
+.select-trigger.is-hover{ border-color: #3A4E3A; }
+.select-trigger.is-focus{ border-color: var(--action); box-shadow: 0 0 0 3px rgba(0,255,65,.14); }
+.select-trigger.is-open{ border-color: var(--action); }
+.select-trigger.is-open i{ transform: rotate(180deg); color: var(--action); }
+.select-trigger.is-disabled{ color: var(--text-tertiary); background: var(--bg-header); cursor:not-allowed; }
+.select-trigger.is-loading{ color: transparent; }
+.select-menu{
+  margin-top:4px; background: var(--bg-header); border:1px solid var(--border-strong);
+  border-radius: var(--radius-sm); padding: var(--sp-1) 0; max-height:264px; overflow-y:auto;
+}
+.select-option{
+  display:flex; align-items:center; gap: var(--sp-2); min-height:32px; padding: 0 var(--sp-3);
+  font-size:.86rem; color: var(--text-secondary); cursor:pointer;
+}
+.select-option i{ font-size:13px; width:13px; color: var(--action); }
+.select-option.is-hover{ background: var(--bg-raised); color: var(--text); }
+.select-option.is-selected{ color: var(--text); }
+
+/* ============================================================ SWITCH */
+.switch-row{ display:flex; align-items:center; gap: var(--sp-3); min-height:40px; }
+.switch{
+  width:34px; height:18px; border-radius:9px; background: var(--border-strong);
+  position:relative; flex:none; cursor:pointer; border:none; padding:0;
+  transition: background var(--dur-fast) var(--ease);
+}
+.switch::after{
+  content:''; position:absolute; top:3px; left:3px; width:12px; height:12px; border-radius:50%;
+  background: var(--bg); transition: transform var(--dur-base) var(--ease);
+}
+.switch.is-hover{ background: #3F5540; }
+.switch.is-on{ background: var(--action); }
+.switch.is-on::after{ transform: translateX(16px); }
+.switch.is-disabled{ background: var(--border); cursor:not-allowed; }
+.switch.is-disabled::after{ background: var(--bg-header); }
+.switch.is-loading{ background: var(--border-strong); }
+.switch.is-loading::after{ animation: switch-pulse 1s ease-in-out infinite; }
+@keyframes switch-pulse{ 50%{ opacity:.35; } }
+.switch-label{ font-size:.86rem; color: var(--text); }
+.switch-label.is-off{ color: var(--text-tertiary); }
+
+/* ============================================================ TOOLTIP */
+.tooltip{
+  display:inline-block; background: var(--bg-header); border:1px solid var(--border-strong);
+  border-radius: var(--radius-sm); padding: 6px 10px; font-size:.8rem; color: var(--text-secondary);
+  max-width:40ch; line-height:1.45;
+}
+.tooltip b{ color: var(--text); font-weight:600; }
+.tooltip .mono{ font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--text); }
+.icon-btn{
+  width:40px; height:40px; display:inline-flex; align-items:center; justify-content:center;
+  background:none; border:1px solid var(--border); border-radius: var(--radius-sm);
+  color: var(--text-secondary); cursor:pointer; font-size:16px;
+}
+.icon-btn.is-hover{ color: var(--text); border-color: var(--border-strong); background: var(--bg-raised); }
+
+/* ============================================================ DIÁLOGO */
+.dialog-stage{
+  position:relative; background: repeating-linear-gradient(45deg, #0B110B, #0B110B 10px, #0D140D 10px, #0D140D 20px);
+  border:1px solid var(--border); border-radius: var(--radius-md); padding: var(--sp-6) var(--sp-4);
+  display:flex; justify-content:center;
+}
+.dialog-stage::before{ content:''; position:absolute; inset:0; background: rgba(8,12,8,.72); border-radius: var(--radius-md); }
+.dialog{
+  position:relative; width:100%; max-width:440px; background: var(--bg-raised);
+  border:1px solid var(--border-strong); border-radius: var(--radius-md); padding: var(--sp-5);
+}
+.dialog-title{ font-family: var(--font-ui); font-weight:800; font-size:1.28rem; letter-spacing:-.02em; margin: 0 0 var(--sp-2); }
+.dialog-body{ color: var(--text-secondary); font-size:.88rem; max-width:60ch; margin: 0 0 var(--sp-5); }
+.dialog-foot{ display:flex; justify-content:flex-end; gap: var(--sp-2); border-top:1px solid var(--border); padding-top: var(--sp-4); }
+.btn-danger{ background: var(--critical); color: #1A0705; }
+.btn-danger.is-hover{ background: #E64B40; }
+
+/* ============================================================ GRÁFICO */
+.chart-panel{ background: var(--bg-raised); border:1px solid var(--border); border-radius: var(--radius-md); padding: var(--sp-4) var(--sp-5) var(--sp-5); }
+.chart-head{ display:flex; align-items:baseline; justify-content:space-between; gap: var(--sp-4); margin-bottom: var(--sp-3); }
+.chart-title{ font-weight:700; font-size:.92rem; margin:0; }
+.chart-legend{ display:flex; flex-wrap:wrap; gap: var(--sp-4); }
+.legend-item{ display:inline-flex; align-items:center; gap:7px; font-family: var(--font-mono); font-size:.68rem; letter-spacing:.07em; text-transform:uppercase; color: var(--text-tertiary); }
+.legend-key{ width:9px; height:2px; border-radius:1px; flex:none; }
+.legend-val{ color: var(--text); font-variant-numeric: tabular-nums; letter-spacing:0; }
+.chart svg{ display:block; width:100%; height:auto; }
+.chart-axis{ font-family:'Space Mono', monospace; font-size:9.5px; fill: var(--text-tertiary); }
+.chart-note{ font-size:.78rem; color: var(--text-tertiary); margin: var(--sp-3) 0 0; }
+
+.spark-row{ display:flex; align-items:center; gap: var(--sp-3); padding: var(--sp-2) 0; border-top:1px solid var(--border); }
+.spark-row:first-of-type{ border-top:none; }
+.spark-name{ font-size:.86rem; width:150px; flex:none; }
+.spark-val{ font-family: var(--font-mono); font-size:.86rem; font-variant-numeric: tabular-nums; width:72px; text-align:right; flex:none; }
+.spark-row svg{ flex:1; height:24px; }
+
+footer.doc-footer{ border-top:1px solid var(--border); margin-top: var(--sp-8); padding-top: var(--sp-5); color: var(--text-tertiary); font-family: var(--font-mono); font-size:.76rem; }
+
+@media (max-width: 860px){
+  .shell{ grid-template-columns: minmax(0, 1fr); }
+  .side{ display:none; }
+  .main{ padding: var(--sp-6) var(--sp-4); }
+  .copy-pair{ grid-template-columns: minmax(0, 1fr); }
+  .type-row{ grid-template-columns: minmax(0, 1fr); gap: var(--sp-2); }
+  .type-spec{ text-align:left; }
+  .icon-sizes{ gap: var(--sp-4); }
+}
+@media (max-width: 640px){
+  .grid.cols-2, .grid.cols-3, .grid.cols-4, .grid.cols-5, .grid.cols-6{ grid-template-columns: minmax(0, 1fr); }
+  .state-demo, .state-demo[style]{ grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .insight-foot{ flex-direction:column; gap: var(--sp-3); }
+  .spark-name{ width:96px; }
+  .dialog-stage{ padding: var(--sp-4) var(--sp-2); }
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- =============================== SIDEBAR =============================== -->
+  <nav class="side" aria-label="Navegação do design system">
+    <div class="brand"><span class="brand-mark">IMMUNO<em>.OPS</em></span></div>
+    <p class="brand-sub">Design System · Produto</p>
+
+    <div class="nav-group">
+      <span class="nav-group-label">Fundação</span>
+      <a class="nav-link" href="#fundacao">00 · O que é esta camada</a>
+    </div>
+    <div class="nav-group">
+      <span class="nav-group-label">Tokens</span>
+      <a class="nav-link" href="#tokens-cor">Cor</a>
+      <a class="nav-link" href="#tokens-tipo">Tipografia</a>
+      <a class="nav-link" href="#tokens-espaco">Espaçamento &amp; raio</a>
+      <a class="nav-link" href="#tokens-bp">Breakpoints</a>
+      <a class="nav-link" href="#tokens-icones">Ícones</a>
+    </div>
+    <div class="nav-group">
+      <span class="nav-group-label">Estados de tela</span>
+      <a class="nav-link" href="#estados-tela">Contrato dos 5 estados</a>
+    </div>
+    <div class="nav-group">
+      <span class="nav-group-label">Componentes</span>
+      <a class="nav-link" href="#c-botao">Botão</a>
+      <a class="nav-link" href="#c-campo">Campo</a>
+      <a class="nav-link" href="#c-badge">Badge de estado</a>
+      <a class="nav-link" href="#c-insight">Card de insight</a>
+      <a class="nav-link" href="#c-painel">Painel &amp; cabeçalho</a>
+      <a class="nav-link" href="#c-tabs">Tabs</a>
+      <a class="nav-link" href="#c-chip">Chip</a>
+      <a class="nav-link" href="#c-select">Dropdown</a>
+      <a class="nav-link" href="#c-switch">Switch</a>
+      <a class="nav-link" href="#c-tooltip">Tooltip</a>
+      <a class="nav-link" href="#c-dialog">Diálogo &amp; anti-snackbar</a>
+      <a class="nav-link" href="#c-tabela">Tabela densa</a>
+      <a class="nav-link" href="#c-grafico">Gráficos</a>
+      <a class="nav-link" href="#c-vazio-erro">Vazio &amp; erro</a>
+      <a class="nav-link" href="#c-skeleton">Skeleton</a>
+      <a class="nav-link" href="#c-mock">Banner de dado não-real</a>
+    </div>
+    <div class="nav-group">
+      <span class="nav-group-label">Escrita &amp; acesso</span>
+      <a class="nav-link" href="#microcopy">Microcopy</a>
+      <a class="nav-link" href="#acessibilidade">Acessibilidade</a>
+    </div>
+  </nav>
+
+  <!-- =============================== MAIN =============================== -->
+  <main class="main">
+
+    <header class="hero">
+      <p class="hero-tag">v1.1</p>
+      <h1>Design System de Produto</h1>
+      <p>O sistema de referência para o console operacional do Immuno Ops: tokens, os cinco estados
+      que toda tela responde, e a linguagem de componentes com seus seis estados de interação.
+      Nenhuma decisão visual fica fora daqui.</p>
+      <div class="hero-meta">
+        <span><b>Modo:</b> dark only</span>
+        <span><b>Plataforma:</b> Kubernetes reliability intelligence</span>
+        <span><b>Stack:</b> Flutter</span>
+      </div>
+    </header>
+
+    <!-- ================= FUNDAÇÃO ================= -->
+    <section class="doc-section" id="fundacao">
+      <p class="section-eyebrow">00 · Fundação</p>
+      <h2 class="section-title">Os três princípios de design</h2>
+      <p class="section-intro">Toda decisão visual deste sistema — cor, componente, densidade — existe
+      para tornar uma diferença visível antes de ser lida: o produto previne, não só alerta.</p>
+
+      <div class="grid cols-3">
+        <div class="panel">
+          <p class="panel-title" style="margin-bottom:6px;">01 · Sinal, não ruído</p>
+          <p style="color:var(--text-secondary); font-size:.86rem; margin:0;">Cor é informação, nunca decoração. Se está colorido, tem significado. Se está quieto, está saudável.</p>
+        </div>
+        <div class="panel">
+          <p class="panel-title" style="margin-bottom:6px;">02 · Precisão de instrumento</p>
+          <p style="color:var(--text-secondary); font-size:.86rem; margin:0;">A interface se veste de painel técnico: monoespaçado, alinhamento rígido, números tabulares, hierarquia clara.</p>
+        </div>
+        <div class="panel">
+          <p class="panel-title" style="margin-bottom:6px;">03 · Direto sem pedir licença</p>
+          <p style="color:var(--text-secondary); font-size:.86rem; margin:0;">Frase curta, verbo forte, zero jargão corporativo. A interface fala como engenheiro fala.</p>
+        </div>
+      </div>
+
+      <h3 class="sub-title">Modo: dark only</h3>
+      <p class="section-intro">Este sistema tem <strong>um tema só</strong>. Não existe tema claro, não
+      existe alternador, e nenhuma cor aqui tem contrapartida em fundo branco.</p>
+
+      <table class="spec-table">
+        <tr><th>Por quê</th><th></th></tr>
+        <tr><td>O sinal depende do silêncio</td><td>O princípio nº 1 só funciona se quase nada tem cor. Sobre fundo branco, <em>warning</em>, <em>critical</em> e <em>info</em> precisam escurecer e saturar para sobreviver ao contraste — e aí a tela inteira fica colorida, que é o resultado oposto.</td></tr>
+        <tr><td>O console fica aberto o dia todo</td><td>Segundo monitor, sala de operação, turno noturno. Fundo claro em tela grande e permanente cansa, e cansaço em plantão é problema de produto.</td></tr>
+        <tr><td>Uma paleta, um teste</td><td>Dois temas dobram a superfície de erro de contraste e de estado de componente sem dobrar o valor entregue. Um fundo só é um fundo verificável.</td></tr>
+        <tr><td>O verde só existe no escuro</td><td><code>#00FF41</code> sobre <code>#080C08</code> é a marca. O mesmo verde sobre branco é ilegível e teria de virar outro verde — ou seja, outra marca.</td></tr>
+      </table>
+
+      <div class="rule forbid">
+        <span class="rule-tag"><i class="ph-bold ph-prohibit icon-14"></i>Fora do sistema</span>
+        <p>Alternador de tema, tema claro, tema de alto contraste alternativo e inversão automática por
+        preferência do sistema operacional <strong>não fazem parte deste design system</strong>. Se um
+        alternador aparecer na interface, ele não veio daqui — e não há tokens que o sustentem.</p>
+      </div>
+
+      <h3 class="sub-title">Como este documento se organiza</h3>
+      <table class="spec-table">
+        <thead><tr><th>Camada</th><th>O que cobre</th></tr></thead>
+        <tbody>
+          <tr><td>Tokens</td><td>Cor, tipografia, espaçamento, raio, breakpoint, ícone — os valores que tudo mais consome</td></tr>
+          <tr><td>Estados de tela</td><td>O contrato que toda superfície de dado segue: carregando, vazio, erro, parcial, dado não-real</td></tr>
+          <tr><td>Componentes</td><td>Botão, campo, badge, card, painel, tabs, chip, dropdown, switch, tooltip, diálogo — cada um com seus seis estados de interação</td></tr>
+          <tr><td>Padrão de dado</td><td>Tabela densa e gráficos: como número, série e marcação se desenham</td></tr>
+            <tr><td>Escrita &amp; acesso</td><td>Microcopy e as regras de acessibilidade operacional</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ================= TOKENS · COR ================= -->
+    <section class="doc-section" id="tokens-cor">
+      <p class="section-eyebrow">01 · Tokens</p>
+      <h2 class="section-title">Cor</h2>
+      <p class="section-intro">Uma paleta só, desenhada para fundo escuro — ver <em>Modo: dark only</em>
+      na fundação. Clique num cartão para copiar o hex; o nome do token abaixo do nome humano é o que
+      se escreve no código. Regra que governa tudo: <strong>saudável
+      não tem cor</strong>; só warning, critical, info e savings recebem cor. Verde ocupa no máximo
+      <strong>8%</strong> da área de qualquer tela.</p>
+
+      <h3 class="sub-title">Superfície</h3>
+      <div class="grid cols-5" id="sw-surface"></div>
+
+      <h3 class="sub-title">Texto</h3>
+      <div class="grid cols-3" id="sw-text"></div>
+
+      <h3 class="sub-title">Ação</h3>
+      <div class="grid cols-3" id="sw-action"></div>
+
+      <h3 class="sub-title">Estado semântico</h3>
+      <div class="grid cols-4" id="sw-state"></div>
+
+      <h3 class="sub-title">Série de dado</h3>
+      <p class="section-intro">Série de gráfico é <strong>identidade, não estado</strong>. Uma linha não
+      muda de cor porque piorou — ela é sempre a mesma cor, e a piora aparece na marcação (limite,
+      faixa de incidente) desenhada por cima. Nenhuma série usa <code>--action</code>,
+      <code>--warning</code>, <code>--critical</code>, <code>--info</code> ou <code>--healthy</code>:
+      essas cinco ficam reservadas para significado semântico, senão "cor é informação" vira
+      "cor é decoração". Atribuição em ordem fixa, sem sortear.</p>
+      <div class="grid cols-6" id="sw-series"></div>
+    </section>
+
+    <!-- ================= TOKENS · TIPO ================= -->
+    <section class="doc-section" id="tokens-tipo">
+      <h2 class="section-title">Tipografia</h2>
+      <p class="section-intro">Teko é <strong>só para número grande e display</strong> — nunca título
+      de página nem texto corrido. Space Mono é a voz do dado: todo número, rótulo, tag e trecho de
+      código. Manrope carrega o resto. Texto corrido no máximo 70 caracteres por linha; número em
+      coluna sempre com <code style="font-family:var(--font-mono); color:var(--action); background:var(--bg-raised); padding:1px 6px; border-radius:2px;">tabular-nums</code>.</p>
+
+      <div class="type-row">
+        <span class="type-label">Display</span>
+        <span style="font-family:var(--font-display); font-weight:700; font-size:clamp(2.2rem,7vw,4.5rem); letter-spacing:.005em; line-height:1;">−80%</span>
+        <span class="type-spec">Teko 700 · clamp(3rem,10vw,7rem)</span>
+      </div>
+      <p class="section-intro" style="margin-top:var(--sp-2);">Display/Teko fica reservado a um momento raro de destaque
+      agregado — um resumo executivo, um hero de dashboard. Dado de telemetria rotineiro (p99, contagem, custo por
+      linha de tabela) é sempre Space Mono, sem exceção. É por isso que o exemplo acima usa uma economia agregada
+      ("−80%"), não um número de linha de tabela como <code style="font-family:var(--font-mono); background:var(--bg-header); padding:1px 6px; border-radius:2px; color:var(--action);">142ms</code>.</p>
+      <div class="type-row">
+        <span class="type-label">H1</span>
+        <span style="font-family:var(--font-ui); font-weight:800; font-size:2rem; letter-spacing:-.035em;">Workloads</span>
+        <span class="type-spec">Manrope 800 · 2.5rem · −.035em</span>
+      </div>
+      <div class="type-row">
+        <span class="type-label">H2</span>
+        <span style="font-family:var(--font-ui); font-weight:800; font-size:1.5rem; letter-spacing:-.032em;">payments-api</span>
+        <span class="type-spec">Manrope 800 · 1.75rem · −.032em</span>
+      </div>
+      <div class="type-row">
+        <span class="type-label">H3</span>
+        <span style="font-family:var(--font-ui); font-weight:800; font-size:1.15rem; letter-spacing:-.02em;">Memory limit reached</span>
+        <span class="type-spec">Manrope 800 · 1.28rem · −.02em</span>
+      </div>
+      <div class="type-row">
+        <span class="type-label">Corpo</span>
+        <span style="font-family:var(--font-ui); font-weight:400;">OOMKilled 14 vezes na última hora.</span>
+        <span class="type-spec">Manrope 400/500 · 1rem · linha 1.65</span>
+      </div>
+      <div class="type-row">
+        <span class="type-label">Rótulo</span>
+        <span style="font-family:var(--font-mono); font-size:.78rem; text-transform:uppercase; letter-spacing:.09em; color:var(--text-secondary);">Impacto no checkout</span>
+        <span class="type-spec">Space Mono 400 · .78rem CAIXA ALTA</span>
+      </div>
+      <div class="type-row">
+        <span class="type-label">Dado</span>
+        <span style="font-family:var(--font-mono); font-weight:700; font-variant-numeric:tabular-nums;">$310/mo</span>
+        <span class="type-spec">Space Mono 400/700 · herda tamanho</span>
+      </div>
+
+      <h3 class="sub-title">Hierarquia de rótulo</h3>
+      <p class="section-intro">Rótulo aparece aninhado em várias hierarquias ao mesmo tempo — item de
+      navegação, cabeçalho de coluna, breadcrumb, legenda de métrica — e um tamanho só não sustenta
+      isso. Três degraus, sempre dentro da mesma família Space Mono / CAIXA ALTA / tracking alto:</p>
+      <table class="spec-table">
+        <thead><tr><th>Degrau</th><th>Tamanho</th><th>Uso</th></tr></thead>
+        <tbody>
+          <tr><td>Terciário</td><td><code>.66–.68rem</code></td><td>Item de navegação, cabeçalho de tabela</td></tr>
+          <tr><td>Padrão</td><td><code>.72–.74rem</code></td><td>Eyebrow de seção, breadcrumb, metadado</td></tr>
+          <tr><td>Destaque</td><td><code>.78rem</code></td><td>Rótulo de campo, legenda de métrica principal</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ================= TOKENS · ESPAÇO E RAIO ================= -->
+    <section class="doc-section" id="tokens-espaco">
+      <h2 class="section-title">Espaçamento &amp; raio</h2>
+      <p class="section-intro">Base 4px, ritmo de 8. Raio deliberadamente pequeno — instrumento não
+      é cartão de app de consumo.</p>
+
+      <h3 class="sub-title">Escala de espaçamento</h3>
+      <div id="scale-space"></div>
+
+      <h3 class="sub-title">Raio</h3>
+      <table class="spec-table">
+        <thead><tr><th>Token</th><th>Valor</th><th>Uso</th></tr></thead>
+        <tbody>
+          <tr><td><code>radius-none</code></td><td>0</td><td>Tabela, container de página, painel de largura total</td></tr>
+          <tr><td><code>radius-sm</code></td><td>2px</td><td>Campo, botão, badge, chip</td></tr>
+          <tr><td><code>radius-md</code></td><td>3px</td><td>Card, painel elevado, modal</td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="sub-title">Elevação</h3>
+      <p class="section-intro" style="margin-bottom:0;">Sem <code style="font-family:var(--font-mono); background:var(--bg-raised); padding:1px 6px; border-radius:2px; color:var(--action);">box-shadow</code>
+      difuso — foge do clichê de card de SaaS e é mais coerente com "sinal, não ruído". Elevação vem
+      de <strong>degrau de superfície</strong>: Ground → Surface → Surface 2, sempre com borda de 1px em <code style="font-family:var(--font-mono); background:var(--bg-raised); padding:1px 6px; border-radius:2px; color:var(--action);">--border</code>.</p>
+    </section>
+
+    <!-- ================= TOKENS · BREAKPOINTS ================= -->
+    <section class="doc-section" id="tokens-bp">
+      <h2 class="section-title">Breakpoints</h2>
+      <p class="section-intro">Nomeados pelo contexto de uso real, não por device genérico — o alvo
+      é desktop e segundo monitor. Tela estreita <strong>degrada</strong>, não precisa virar layout mobile.</p>
+
+      <div class="grid cols-4">
+        <div class="bp-card"><p class="bp-name">console-compact</p><p class="bp-range">&lt; 768px</p><p class="bp-desc">Coluna única, tabela vira lista de cards, navegação colapsa.</p></div>
+        <div class="bp-card"><p class="bp-name">console</p><p class="bp-range">768–1023px</p><p class="bp-desc">Layout mínimo viável, colunas secundárias da tabela somem.</p></div>
+        <div class="bp-card"><p class="bp-name">console-wide</p><p class="bp-range">1024–1439px</p><p class="bp-desc">Layout de referência. É onde o produto é desenhado primeiro.</p></div>
+        <div class="bp-card"><p class="bp-name">console-ultra</p><p class="bp-range">≥ 1440px</p><p class="bp-desc">Segundo monitor. Painéis lado a lado, densidade máxima de dado.</p></div>
+      </div>
+    </section>
+
+
+    <!-- Ícones -->
+    <section class="doc-section" id="tokens-icones">
+      <h2 class="section-title">Ícones</h2>
+      <p class="section-intro">A biblioteca é <strong>Phosphor Icons</strong>, e só ela. Traço geométrico
+      de peso constante, que é o mesmo vocabulário do resto do sistema — nenhum outro pack entra por
+      conveniência de um ícone faltando; se falta, escolhe-se o mais próximo do Phosphor.</p>
+
+      <h3 class="sub-title">Peso</h3>
+      <table class="spec-table">
+        <tr><th>Peso</th><th>Onde</th></tr>
+        <tr><td>Regular</td><td>Padrão de tudo. Se a decisão não foi tomada, é Regular.</td></tr>
+        <tr><td>Bold</td><td>Só em ação primária e em ícone de estado <em>critical</em> — onde o ícone precisa competir com o texto.</td></tr>
+        <tr><td>Fill</td><td>Só no ponto do badge e no marcador de série em legenda. Nunca em ação.</td></tr>
+        <tr><td>Thin / Light / Duotone</td><td>Não se usam. Thin some no fundo escuro; Duotone briga com a regra de cor.</td></tr>
+      </table>
+
+      <div class="grid cols-5">
+        <div class="icon-weight"><i class="ph ph-warning-octagon"></i><span class="icon-weight-name">Regular</span><span class="icon-weight-use">Padrão de tudo</span></div>
+        <div class="icon-weight"><i class="ph-bold ph-warning-octagon"></i><span class="icon-weight-name">Bold</span><span class="icon-weight-use">Ação primária, critical</span></div>
+        <div class="icon-weight"><i class="ph-fill ph-warning-octagon"></i><span class="icon-weight-name">Fill</span><span class="icon-weight-use">Ponto de badge, legenda</span></div>
+        <div class="icon-weight is-banned"><i class="ph ph-prohibit"></i><span class="icon-weight-name">Thin / Light</span><span class="icon-weight-use">Some no fundo escuro</span></div>
+        <div class="icon-weight is-banned"><i class="ph ph-prohibit"></i><span class="icon-weight-name">Duotone</span><span class="icon-weight-use">Briga com a regra de cor</span></div>
+      </div>
+
+      <h3 class="sub-title">Tamanho</h3>
+      <table class="spec-table">
+        <tr><th>Tamanho</th><th>Uso</th></tr>
+        <tr><td><code>14px</code></td><td>Inline em rótulo mono, chip, breadcrumb.</td></tr>
+        <tr><td><code>16px</code></td><td>Botão, linha de tabela, item de menu. É o tamanho padrão.</td></tr>
+        <tr><td><code>20px</code></td><td>Cabeçalho de painel, ação de barra, ícone-only.</td></tr>
+        <tr><td><code>24px</code></td><td>Cabeçalho de página, diálogo.</td></tr>
+        <tr><td><code>40px</code></td><td>Ilustração de estado vazio e de erro. Único tamanho decorativo.</td></tr>
+      </table>
+
+      <div class="icon-sizes">
+        <div class="icon-size"><i class="ph ph-cube icon-14"></i><span>14</span></div>
+        <div class="icon-size"><i class="ph ph-cube icon-16"></i><span>16</span></div>
+        <div class="icon-size"><i class="ph ph-cube icon-20"></i><span>20</span></div>
+        <div class="icon-size"><i class="ph ph-cube icon-24"></i><span>24</span></div>
+        <div class="icon-size"><i class="ph ph-cube icon-40"></i><span>40</span></div>
+      </div>
+
+      <h3 class="sub-title">Regras</h3>
+      <table class="spec-table">
+        <tr><th>Regra</th><th>Por quê</th></tr>
+        <tr><td>Herda <code>currentColor</code></td><td>Ícone nunca tem cor própria — pega a do texto ao lado. Cor de ícone é sempre consequência de estado, nunca escolha isolada.</td></tr>
+        <tr><td>Nunca sozinho como estado</td><td>Vale a mesma regra do badge: cor + palavra. Ícone sem rótulo não comunica estado, decora.</td></tr>
+        <tr><td>Ícone-only exige tooltip</td><td>Botão sem texto só existe com tooltip e <code>aria-label</code>, em alvo de 40×40px.</td></tr>
+        <tr><td>Gap de 8px do texto</td><td><code>--sp-2</code>, alinhado por <code>align-items:center</code> — nunca por baseline, que desalinha em traço geométrico.</td></tr>
+        <tr><td>Logo de tecnologia não é Phosphor</td><td>Kubernetes, OpenTelemetry, Prometheus, Grafana, GCP e AWS entram como SVG oficial monocromático. Redesenhar um logo em Phosphor é erro, não consistência.</td></tr>
+      </table>
+
+      <h3 class="sub-title">Vocabulário canônico</h3>
+      <p class="section-intro">O mesmo conceito usa o mesmo ícone em toda tela. Esta lista é fechada:
+      conceito novo entra aqui antes de entrar na interface.</p>
+      <div class="grid cols-4">
+        <div class="icon-card"><i class="ph-fill ph-check-circle" style="color:var(--healthy)"></i><span><span class="icon-card-name">ph-check-circle</span><span class="icon-card-use">Healthy</span></span></div>
+        <div class="icon-card"><i class="ph ph-warning" style="color:var(--warning)"></i><span><span class="icon-card-name">ph-warning</span><span class="icon-card-use">Degraded</span></span></div>
+        <div class="icon-card"><i class="ph-bold ph-warning-octagon" style="color:var(--critical)"></i><span><span class="icon-card-name">ph-warning-octagon</span><span class="icon-card-use">Critical</span></span></div>
+        <div class="icon-card"><i class="ph ph-info" style="color:var(--info)"></i><span><span class="icon-card-name">ph-info</span><span class="icon-card-use">Evento, deploy</span></span></div>
+        <div class="icon-card"><i class="ph ph-flask" style="color:var(--info)"></i><span><span class="icon-card-name">ph-flask</span><span class="icon-card-use">Dado não-real</span></span></div>
+        <div class="icon-card"><i class="ph ph-trend-down" style="color:var(--action)"></i><span><span class="icon-card-name">ph-trend-down</span><span class="icon-card-use">Economia</span></span></div>
+        <div class="icon-card"><i class="ph ph-trend-up"></i><span><span class="icon-card-name">ph-trend-up</span><span class="icon-card-use">Custo subindo</span></span></div>
+        <div class="icon-card"><i class="ph ph-cube"></i><span><span class="icon-card-name">ph-cube</span><span class="icon-card-use">Workload</span></span></div>
+        <div class="icon-card"><i class="ph ph-stack"></i><span><span class="icon-card-name">ph-stack</span><span class="icon-card-use">Namespace</span></span></div>
+        <div class="icon-card"><i class="ph ph-graph"></i><span><span class="icon-card-name">ph-graph</span><span class="icon-card-use">Cluster</span></span></div>
+        <div class="icon-card"><i class="ph ph-bell-ringing"></i><span><span class="icon-card-name">ph-bell-ringing</span><span class="icon-card-use">Alerta</span></span></div>
+        <div class="icon-card"><i class="ph ph-funnel"></i><span><span class="icon-card-name">ph-funnel</span><span class="icon-card-use">Filtro</span></span></div>
+        <div class="icon-card"><i class="ph ph-magnifying-glass"></i><span><span class="icon-card-name">ph-magnifying-glass</span><span class="icon-card-use">Buscar</span></span></div>
+        <div class="icon-card"><i class="ph ph-arrows-clockwise"></i><span><span class="icon-card-name">ph-arrows-clockwise</span><span class="icon-card-use">Atualizar</span></span></div>
+        <div class="icon-card"><i class="ph ph-copy"></i><span><span class="icon-card-name">ph-copy</span><span class="icon-card-use">Copiar</span></span></div>
+        <div class="icon-card"><i class="ph ph-arrow-square-out"></i><span><span class="icon-card-name">ph-arrow-square-out</span><span class="icon-card-use">Link externo</span></span></div>
+      </div>
+
+      <h3 class="sub-title">Em contexto</h3>
+      <p class="section-intro">O ícone quase nunca aparece sozinho. Estes são os seis lugares onde ele
+      entra, no tamanho e no peso que cada um pede — repare que em todos ele herda a cor do texto ao
+      lado, e em nenhum ele é a única coisa dizendo o que está acontecendo.</p>
+      <div class="grid cols-3">
+        <div class="icon-ctx"><span class="icon-ctx-label">Botão · 16px bold</span>
+          <span><button class="btn btn-primary"><i class="ph-bold ph-check icon-16"></i>Aplicar correção</button></span></div>
+        <div class="icon-ctx"><span class="icon-ctx-label">Ícone-only · 20px + tooltip</span>
+          <span><button class="icon-btn" aria-label="Atualizar agora"><i class="ph ph-arrows-clockwise icon-20"></i></button></span></div>
+        <div class="icon-ctx"><span class="icon-ctx-label">Chip · 14px</span>
+          <span><span class="chip"><span class="chip-key">ns:</span>payments<i class="ph ph-x"></i></span></span></div>
+        <div class="icon-ctx"><span class="icon-ctx-label">Tab · 14px</span>
+          <div class="tabs"><button class="tab is-selected"><i class="ph ph-cube icon-14"></i>Pods <span class="tab-count">6</span></button></div></div>
+        <div class="icon-ctx"><span class="icon-ctx-label">Badge · fill 8px</span>
+          <span><span class="badge critical"><span class="badge-dot"></span>Critical</span></span></div>
+        <div class="icon-ctx"><span class="icon-ctx-label">Linha de tabela · 16px</span>
+          <span style="display:flex; align-items:center; gap:8px; font-size:.86rem;"><i class="ph ph-warning icon-16" style="color:var(--warning)"></i>inventory-sync</span></div>
+      </div>
+
+      <div class="grid cols-2" style="margin-top:var(--sp-4);">
+        <div class="icon-ctx"><span class="icon-ctx-label">Estado vazio · 40px</span>
+          <div class="state-block empty" style="padding:var(--sp-6) var(--sp-4);">
+            <i class="ph ph-check-circle icon-40" style="color:var(--text-tertiary); display:block; margin-bottom:var(--sp-2);"></i>
+            <h4>Nenhum alerta nas últimas 24h</h4>
+          </div></div>
+        <div class="icon-ctx"><span class="icon-ctx-label">Banner de dado não-real · 16px</span>
+          <div class="mock-banner"><i class="ph ph-flask icon-16" style="color:var(--info)"></i><span class="mock-banner-tag">Amostra</span><span>Este painel mostra dado simulado.</span></div></div>
+      </div>
+    </section>
+
+    <!-- ================= ESTADOS DE TELA ================= -->
+    <section class="doc-section" id="estados-tela">
+      <p class="section-eyebrow">02 · Contrato</p>
+      <h2 class="section-title">Os 5 estados de tela</h2>
+      <p class="section-intro">Toda superfície que mostra dado responde a exatamente estes cinco
+      estados, sempre com o mesmo componente, no mesmo lugar, com a mesma escrita. Nenhuma página
+      resolve isso do seu próprio jeito.</p>
+
+      <table class="spec-table">
+        <thead><tr><th>Estado</th><th>Componente</th><th>Regra</th></tr></thead>
+        <tbody>
+          <tr><td>Carregando</td><td>Skeleton</td><td>Nunca spinner de tela cheia — o skeleton ocupa a forma real do conteúdo que vai chegar.</td></tr>
+          <tr><td>Vazio</td><td>Estado vazio</td><td>É um convite a agir, não um pedido de desculpa. Sempre com uma ação, quando existe uma.</td></tr>
+          <tr><td>Erro</td><td>Estado de erro</td><td>Explica o que quebrou em linguagem da interface. Erro cru de API nunca chega ao usuário.</td></tr>
+          <tr><td>Parcial / degradado</td><td>Badge + nota inline</td><td>Mostra o que carregou e marca explicitamente o que faltou — nunca esconde a lacuna.</td></tr>
+          <tr><td>Dado não-real</td><td>Banner de dado não-real</td><td>Amostra ou fallback mockado nunca se disfarça de dado real, em nenhuma tela.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ================= COMPONENTES ================= -->
+    <p class="section-eyebrow" id="c-botao" style="padding-top:0;">03 · Componentes</p>
+    <h2 class="section-title" style="margin-bottom:var(--sp-2);">Linguagem de componentes</h2>
+    <p class="section-intro">Seis estados em cada componente interativo: default, hover, focus,
+    active, disabled, loading.</p>
+
+    <!-- Botão -->
+    <section class="doc-section">
+      <h3 class="sub-title" style="margin-top:var(--sp-5);">Botão primário</h3>
+      <div class="state-demo">
+        <div class="state-cell"><span class="state-cell-label">Default</span><button class="btn btn-primary">Aplicar correção</button></div>
+        <div class="state-cell"><span class="state-cell-label">Hover</span><button class="btn btn-primary is-hover">Aplicar correção</button></div>
+        <div class="state-cell"><span class="state-cell-label">Focus</span><button class="btn btn-primary is-focus">Aplicar correção</button></div>
+        <div class="state-cell"><span class="state-cell-label">Active</span><button class="btn btn-primary is-active">Aplicar correção</button></div>
+        <div class="state-cell"><span class="state-cell-label">Disabled</span><button class="btn btn-primary is-disabled">Aplicar correção</button></div>
+        <div class="state-cell"><span class="state-cell-label">Loading</span><button class="btn btn-primary is-loading">Aplicar correção<span class="spinner"></span></button></div>
+      </div>
+
+      <h3 class="sub-title">Botão secundário</h3>
+      <div class="state-demo">
+        <div class="state-cell"><span class="state-cell-label">Default</span><button class="btn btn-secondary">Ver detalhes</button></div>
+        <div class="state-cell"><span class="state-cell-label">Hover</span><button class="btn btn-secondary is-hover">Ver detalhes</button></div>
+        <div class="state-cell"><span class="state-cell-label">Focus</span><button class="btn btn-secondary is-focus">Ver detalhes</button></div>
+        <div class="state-cell"><span class="state-cell-label">Active</span><button class="btn btn-secondary is-active">Ver detalhes</button></div>
+        <div class="state-cell"><span class="state-cell-label">Disabled</span><button class="btn btn-secondary is-disabled">Ver detalhes</button></div>
+        <div class="state-cell"><span class="state-cell-label">Loading</span><button class="btn btn-secondary is-loading">Ver detalhes<span class="spinner"></span></button></div>
+      </div>
+
+      <h3 class="sub-title">Botão ghost</h3>
+      <div class="state-demo">
+        <div class="state-cell"><span class="state-cell-label">Default</span><button class="btn btn-ghost">Cancelar</button></div>
+        <div class="state-cell"><span class="state-cell-label">Hover</span><button class="btn btn-ghost is-hover">Cancelar</button></div>
+      </div>
+    </section>
+
+    <!-- Campo -->
+    <section class="doc-section" id="c-campo">
+      <h3 class="sub-title">Campo</h3>
+      <div class="state-demo">
+        <div class="state-cell"><span class="state-cell-label">Default</span>
+          <div class="field"><span class="field-label">Namespace</span><input class="field-input" value="payments"></div>
+        </div>
+        <div class="state-cell"><span class="state-cell-label">Hover</span>
+          <div class="field"><span class="field-label">Namespace</span><input class="field-input is-hover" value="payments"></div>
+        </div>
+        <div class="state-cell"><span class="state-cell-label">Focus</span>
+          <div class="field"><span class="field-label">Namespace</span><input class="field-input is-focus" value="payments"></div>
+        </div>
+        <div class="state-cell"><span class="state-cell-label">Active / erro</span>
+          <div class="field"><span class="field-label">Namespace</span><input class="field-input" style="border-color:var(--critical);" value="pagamentos!"><span class="field-hint error">Use apenas letras minúsculas e hífen.</span></div>
+        </div>
+        <div class="state-cell"><span class="state-cell-label">Disabled</span>
+          <div class="field"><span class="field-label">Namespace</span><input class="field-input is-disabled" value="payments" disabled></div>
+        </div>
+        <div class="state-cell"><span class="state-cell-label">Loading</span>
+          <div class="field"><span class="field-label">Namespace</span><input class="field-input is-loading" value=""></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Badge -->
+    <section class="doc-section" id="c-badge">
+      <h3 class="sub-title">Badge de estado</h3>
+      <p class="section-intro">Cor + palavra, sempre — nunca cor sozinha. Não são estados de interação;
+      são as variantes semânticas fixas da seção 07.</p>
+      <div class="state-demo" style="grid-template-columns:repeat(5, minmax(0, 1fr));">
+        <div class="state-cell"><span class="state-cell-label">Healthy</span><span class="badge healthy"><span class="badge-dot"></span>Healthy</span></div>
+        <div class="state-cell"><span class="state-cell-label">Warning</span><span class="badge warning"><span class="badge-dot"></span>Degraded</span></div>
+        <div class="state-cell"><span class="state-cell-label">Critical</span><span class="badge critical"><span class="badge-dot"></span>Critical</span></div>
+        <div class="state-cell"><span class="state-cell-label">Info</span><span class="badge info"><span class="badge-dot"></span>Deploy</span></div>
+        <div class="state-cell"><span class="state-cell-label">Savings</span><span class="badge savings"><span class="badge-dot"></span>−$4,280/mo</span></div>
+      </div>
+    </section>
+
+    <!-- Insight card -->
+    <section class="doc-section" id="c-insight">
+      <h3 class="sub-title">Card de insight</h3>
+      <p class="section-intro">O padrão canônico da seção 07, reaplicado nas quatro telas de maior
+      peso: causa raiz, impacto no negócio e valor em dinheiro na mesma superfície.</p>
+      <div class="insight-card">
+        <div class="insight-top">
+          <span class="badge critical"><span class="badge-dot"></span>Critical</span>
+          <span class="insight-service">payments-api</span>
+        </div>
+        <p class="insight-title">Memory limit reached on 3 pods</p>
+        <p class="insight-body">OOMKilled 14 vezes na última hora. Causa raiz: limite configurado 40% abaixo do pico observado.</p>
+        <div class="insight-foot">
+          <div><p class="insight-metric-label">Impacto</p><p class="insight-metric-value">2.1% dos checkouts</p></div>
+          <div><p class="insight-metric-label">Economia da correção</p><p class="insight-metric-value savings">$310/mo</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Painel e cabeçalho -->
+    <section class="doc-section" id="c-painel">
+      <h3 class="sub-title">Cabeçalho de página</h3>
+      <div class="page-header">
+        <p class="breadcrumb"><a href="#">Workloads</a><span class="sep">/</span><a href="#">payments</a><span class="sep">/</span><span class="current">payments-api</span></p>
+        <div class="page-header-row">
+          <div class="page-title-block"><h3>payments-api</h3><p class="page-title-sub">Namespace payments · 6 pods · atualizado há 12s</p></div>
+          <button class="btn btn-primary">Aplicar correção sugerida</button>
+        </div>
+      </div>
+
+      <h3 class="sub-title">Painel</h3>
+      <div class="panel">
+        <div class="panel-header"><p class="panel-title">Filtros</p><button class="btn btn-ghost">Limpar</button></div>
+        <div class="grid cols-3">
+          <div class="field"><span class="field-label">Namespace</span><input class="field-input" value="Todos"></div>
+          <div class="field"><span class="field-label">Severidade</span><input class="field-input" value="Critical, Warning"></div>
+          <div class="field"><span class="field-label">Janela</span><input class="field-input" value="Última hora"></div>
+        </div>
+      </div>
+
+      <h3 class="sub-title">Card clicável (linha de lista)</h3>
+      <div class="state-demo" style="grid-template-columns:repeat(3, minmax(0, 1fr));">
+        <div class="state-cell" style="width:100%;"><span class="state-cell-label">Default</span>
+          <button class="click-card"><strong>checkout-api</strong><br><span style="color:var(--text-tertiary); font-size:.82rem;">12 pods · healthy</span></button>
+        </div>
+        <div class="state-cell" style="width:100%;"><span class="state-cell-label">Hover</span>
+          <button class="click-card is-hover"><strong>checkout-api</strong><br><span style="color:var(--text-tertiary); font-size:.82rem;">12 pods · healthy</span></button>
+        </div>
+        <div class="state-cell" style="width:100%;"><span class="state-cell-label">Focus</span>
+          <button class="click-card is-focus"><strong>checkout-api</strong><br><span style="color:var(--text-tertiary); font-size:.82rem;">12 pods · healthy</span></button>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- Tabs -->
+    <section class="doc-section" id="c-tabs">
+      <h3 class="sub-title">Tabs</h3>
+      <p class="section-intro">Tab troca a <strong>visão do mesmo objeto</strong> — nunca leva a outro
+      objeto, que é trabalho de navegação e breadcrumb. Rótulo em Space Mono caixa alta como todo item
+      de navegação, contador em tabular-nums colado. Máximo de seis; acima disso o problema não é a
+      tab, é a tela.</p>
+      <div class="state-demo" style="grid-template-columns:repeat(3, minmax(0, 1fr));">
+        <div class="state-cell" style="width:100%;"><span class="state-cell-label">Default</span>
+          <div class="tabs"><button class="tab">Eventos <span class="tab-count">24</span></button></div>
+        </div>
+        <div class="state-cell" style="width:100%;"><span class="state-cell-label">Hover</span>
+          <div class="tabs"><button class="tab is-hover">Eventos <span class="tab-count">24</span></button></div>
+        </div>
+        <div class="state-cell" style="width:100%;"><span class="state-cell-label">Focus</span>
+          <div class="tabs"><button class="tab is-focus">Eventos <span class="tab-count">24</span></button></div>
+        </div>
+        <div class="state-cell" style="width:100%;"><span class="state-cell-label">Selecionada</span>
+          <div class="tabs"><button class="tab is-selected">Eventos <span class="tab-count">24</span></button></div>
+        </div>
+        <div class="state-cell" style="width:100%;"><span class="state-cell-label">Disabled</span>
+          <div class="tabs"><button class="tab is-disabled">Eventos <span class="tab-count">—</span></button></div>
+        </div>
+        <div class="state-cell" style="width:100%;"><span class="state-cell-label">Loading</span>
+          <div class="tabs"><button class="tab is-selected">Eventos <span class="tab-count skel" style="display:inline-block;width:18px;height:10px;"></span></button></div>
+        </div>
+      </div>
+
+      <p class="section-intro" style="margin-top:var(--sp-2);">Em uso, na tela de workload:</p>
+      <div class="tabs">
+        <button class="tab is-selected"><i class="ph ph-pulse icon-14"></i>Visão geral</button>
+        <button class="tab"><i class="ph ph-cube icon-14"></i>Pods <span class="tab-count">6</span></button>
+        <button class="tab"><i class="ph ph-warning-octagon icon-14"></i>Eventos <span class="tab-count">24</span></button>
+        <button class="tab"><i class="ph ph-currency-dollar icon-14"></i>Custo</button>
+        <button class="tab is-disabled"><i class="ph ph-file-text icon-14"></i>Logs</button>
+      </div>
+
+      <table class="spec-table" style="margin-top:var(--sp-5);">
+        <tr><th>Regra</th><th>Detalhe</th></tr>
+        <tr><td>Altura</td><td>Mínimo 40px de alvo, borda inferior de 1px em <code>--border</code> atravessando toda a largura.</td></tr>
+        <tr><td>Seleção</td><td>Borda inferior de 2px em <code>--action</code> + texto em <code>--action</code>. Nunca só cor de texto: cor + forma.</td></tr>
+        <tr><td>Contador</td><td>Só quando o número muda a decisão de clicar. Contador zerado não vira <code>0</code>, a tab só não tem contador.</td></tr>
+        <tr><td>Estado vazio</td><td>Tab que não tem dado fica <em>disabled</em> com contador <code>—</code>, não some. Sumir esconde a existência da visão.</td></tr>
+        <tr><td>Teclado</td><td>Setas ←/→ movem entre tabs, Home/End vão às pontas, Tab sai para o conteúdo.</td></tr>
+        <tr><td>URL</td><td>Tab selecionada vive na URL. Recarregar a página não devolve o operador para a primeira tab.</td></tr>
+      </table>
+    </section>
+
+    <!-- Chip -->
+    <section class="doc-section" id="c-chip">
+      <h3 class="sub-title">Chip</h3>
+      <p class="section-intro">Chip não é badge. <strong>Badge é estado que o sistema afirma</strong>
+      — não se clica. <strong>Chip é escolha que o operador fez</strong> — clica, tira, alterna. Por isso
+      chip é neutro: se o filtro fosse colorido, competiria com a cor que carrega significado no dado.</p>
+      <div class="state-demo">
+        <div class="state-cell"><span class="state-cell-label">Default</span><span class="chip"><span class="chip-key">ns:</span>payments<i class="ph ph-x"></i></span></div>
+        <div class="state-cell"><span class="state-cell-label">Hover</span><span class="chip is-hover"><span class="chip-key">ns:</span>payments<i class="ph ph-x"></i></span></div>
+        <div class="state-cell"><span class="state-cell-label">Focus</span><span class="chip is-focus"><span class="chip-key">ns:</span>payments<i class="ph ph-x"></i></span></div>
+        <div class="state-cell"><span class="state-cell-label">Selecionado</span><span class="chip is-selected"><i class="ph ph-check"></i>Só críticos</span></div>
+        <div class="state-cell"><span class="state-cell-label">Disabled</span><span class="chip is-disabled"><span class="chip-key">ns:</span>payments<i class="ph ph-x"></i></span></div>
+        <div class="state-cell"><span class="state-cell-label">Loading</span><span class="chip is-loading"><span class="chip-key">ns:</span>payments<span class="spinner"></span></span></div>
+      </div>
+      <table class="spec-table">
+        <tr><th>Regra</th><th>Detalhe</th></tr>
+        <tr><td>Duas variantes</td><td><strong>Filtro removível</strong> (mostra <code>chave: valor</code> e um <code>ph-x</code>) e <strong>toggle</strong> (liga/desliga, marca com <code>ph-check</code>). Não existe uma terceira.</td></tr>
+        <tr><td>Chip é neutro</td><td>Nunca herda cor semântica, mesmo quando filtra por <em>Critical</em>. O chip diz o que foi filtrado, não o quão grave é.</td></tr>
+        <tr><td>Sempre reversível</td><td>Todo chip aplicado pode ser removido do lugar onde aparece. Filtro que só se desfaz voltando ao painel de filtros não é chip.</td></tr>
+        <tr><td>Limpar tudo</td><td>Acima de três chips ativos, aparece um botão ghost "Limpar" ao lado — não um quarto chip.</td></tr>
+        <tr><td>Não é ação</td><td>Chip nunca dispara operação no cluster. Chip filtra a visão; mudar o mundo é trabalho de botão.</td></tr>
+      </table>
+    </section>
+
+    <!-- Dropdown -->
+    <section class="doc-section" id="c-select">
+      <h3 class="sub-title">Dropdown</h3>
+      <p class="section-intro">Mesmo esqueleto do campo — mesma altura, mesma borda, mesmo foco —
+      com um <code>ph-caret-down</code> à direita. A diferença entre digitar e escolher não deve
+      produzir dois desenhos diferentes na mesma linha de formulário.</p>
+      <div class="state-demo">
+        <div class="state-cell" style="width:100%;"><span class="state-cell-label">Default</span>
+          <div class="field" style="width:100%;"><span class="field-label">Severidade</span><button class="select-trigger">Todas<i class="ph ph-caret-down"></i></button></div>
+        </div>
+        <div class="state-cell" style="width:100%;"><span class="state-cell-label">Hover</span>
+          <div class="field" style="width:100%;"><span class="field-label">Severidade</span><button class="select-trigger is-hover">Todas<i class="ph ph-caret-down"></i></button></div>
+        </div>
+        <div class="state-cell" style="width:100%;"><span class="state-cell-label">Focus</span>
+          <div class="field" style="width:100%;"><span class="field-label">Severidade</span><button class="select-trigger is-focus">Todas<i class="ph ph-caret-down"></i></button></div>
+        </div>
+        <div class="state-cell" style="width:100%;"><span class="state-cell-label">Aberto</span>
+          <div class="field" style="width:100%;"><span class="field-label">Severidade</span><button class="select-trigger is-open">Todas<i class="ph ph-caret-down"></i></button></div>
+        </div>
+        <div class="state-cell" style="width:100%;"><span class="state-cell-label">Disabled</span>
+          <div class="field" style="width:100%;"><span class="field-label">Severidade</span><button class="select-trigger is-disabled">Todas<i class="ph ph-caret-down"></i></button></div>
+        </div>
+        <div class="state-cell" style="width:100%;"><span class="state-cell-label">Loading</span>
+          <div class="field" style="width:100%;"><span class="field-label">Severidade</span><button class="select-trigger is-loading skel">&nbsp;<i class="ph ph-caret-down" style="visibility:hidden"></i></button></div>
+        </div>
+      </div>
+
+      <p class="section-intro" style="margin-top:var(--sp-2);">Menu aberto:</p>
+      <div style="max-width:280px;">
+        <button class="select-trigger is-open">Critical, Warning<i class="ph ph-caret-down"></i></button>
+        <div class="select-menu">
+          <div class="select-option is-selected"><i class="ph ph-check"></i>Critical</div>
+          <div class="select-option is-selected is-hover"><i class="ph ph-check"></i>Warning</div>
+          <div class="select-option"><i class="ph"></i>Info</div>
+          <div class="select-option"><i class="ph"></i>Healthy</div>
+        </div>
+      </div>
+
+      <table class="spec-table" style="margin-top:var(--sp-5);">
+        <tr><th>Regra</th><th>Detalhe</th></tr>
+        <tr><td>Item de 32px</td><td>Menor que o alvo de 40px porque o menu já está aberto e o cursor já está sobre ele — densidade ganha aqui.</td></tr>
+        <tr><td>Máximo 8 visíveis</td><td>Acima disso o menu rola. Acima de <strong>12 opções</strong>, o dropdown vira campo com busca — rolar lista longa com o mouse é pior que digitar.</td></tr>
+        <tr><td>Seleção múltipla</td><td>Marca com <code>ph-check</code> em <code>--action</code> à esquerda, e o gatilho mostra os valores separados por vírgula. Acima de dois, <code>"Critical +3"</code>.</td></tr>
+        <tr><td>Nunca "Selecione…"</td><td>O gatilho mostra o valor vigente. Quando tudo passa, escreve <code>Todas</code> — que é a verdade do filtro, não um convite vazio.</td></tr>
+        <tr><td>Teclado</td><td>Enter/Espaço abre, setas navegam, Enter escolhe, ESC fecha e devolve o foco ao gatilho.</td></tr>
+      </table>
+    </section>
+
+    <!-- Switch -->
+    <section class="doc-section" id="c-switch">
+      <h3 class="sub-title">Switch</h3>
+      <p class="section-intro">Switch só existe para efeito <strong>imediato e reversível</strong>. Se a
+      mudança precisa de confirmação, custa dinheiro ou mexe no cluster, não é switch — é botão com
+      diálogo. Um interruptor que abre uma pergunta mentiu sobre o que ele era.</p>
+      <div class="state-demo">
+        <div class="state-cell"><span class="state-cell-label">Off</span><div class="switch-row"><button class="switch"></button><span class="switch-label is-off">Só críticos</span></div></div>
+        <div class="state-cell"><span class="state-cell-label">Hover</span><div class="switch-row"><button class="switch is-hover"></button><span class="switch-label is-off">Só críticos</span></div></div>
+        <div class="state-cell"><span class="state-cell-label">Focus</span><div class="switch-row"><button class="switch is-focus"></button><span class="switch-label is-off">Só críticos</span></div></div>
+        <div class="state-cell"><span class="state-cell-label">On</span><div class="switch-row"><button class="switch is-on"></button><span class="switch-label">Só críticos</span></div></div>
+        <div class="state-cell"><span class="state-cell-label">Disabled</span><div class="switch-row"><button class="switch is-disabled"></button><span class="switch-label is-off">Só críticos</span></div></div>
+        <div class="state-cell"><span class="state-cell-label">Loading</span><div class="switch-row"><button class="switch is-loading"></button><span class="switch-label is-off">Só críticos</span></div></div>
+      </div>
+      <table class="spec-table">
+        <tr><th>Regra</th><th>Detalhe</th></tr>
+        <tr><td>Rótulo diz o ligado</td><td><code>Só críticos</code>, não <code>Filtrar por severidade?</code>. O rótulo nomeia o estado que o switch produz, nunca faz uma pergunta.</td></tr>
+        <tr><td>Rótulo à direita</td><td>Sempre. E o rótulo inteiro é área de clique, junto com o interruptor.</td></tr>
+        <tr><td>Sem "Salvar"</td><td>Switch aplica na hora. Se a tela precisa de um botão de salvar para aquilo valer, o controle certo é checkbox.</td></tr>
+        <tr><td>Nunca destrutivo</td><td>Nenhum switch desliga proteção, apaga recurso ou libera <em>apply</em> automático. Isso é botão + diálogo destrutivo.</td></tr>
+        <tr><td>Loading é real</td><td>O estado <em>loading</em> só aparece se o efeito depende do servidor. Filtro local alterna instantaneamente e nunca pisca.</td></tr>
+      </table>
+    </section>
+
+    <!-- Tooltip -->
+    <section class="doc-section" id="c-tooltip">
+      <h3 class="sub-title">Tooltip</h3>
+      <p class="section-intro">Tooltip <strong>explica</strong> o que já está na tela. Nunca guarda
+      informação que só existe ali: num console operacional, o que só aparece no hover não existe para
+      quem está lendo por teclado, tirando print ou olhando de longe durante um incidente.</p>
+      <div class="grid cols-3" style="align-items:start;">
+        <div class="state-cell"><span class="state-cell-label">Sobre ícone-only</span>
+          <button class="icon-btn is-hover"><i class="ph ph-arrows-clockwise"></i></button>
+          <div class="tooltip" style="margin-top:6px;">Atualizar agora · último dado há <span class="mono">12s</span></div>
+        </div>
+        <div class="state-cell"><span class="state-cell-label">Sobre dado abreviado</span>
+          <span class="mono" style="font-family:var(--font-mono); border-bottom:1px dotted var(--text-tertiary);">142ms</span>
+          <div class="tooltip" style="margin-top:6px;"><b>p99 de latência</b> na última hora, medido no ingress.</div>
+        </div>
+        <div class="state-cell"><span class="state-cell-label">Sobre estado truncado</span>
+          <span class="badge critical"><span class="badge-dot"></span>Critical</span>
+          <div class="tooltip" style="margin-top:6px;">3 de 6 pods em <span class="mono">CrashLoopBackOff</span> desde <span class="mono">14:02</span>.</div>
+        </div>
+      </div>
+      <table class="spec-table">
+        <tr><th>Regra</th><th>Detalhe</th></tr>
+        <tr><td>Não é ajuda de campo</td><td>Explicação de formulário vive no <code>field-hint</code>, visível sempre. Tooltip em campo esconde a regra de quem está preenchendo.</td></tr>
+        <tr><td>Ícone-only exige</td><td>Ação sem texto sem tooltip é ação adivinhada. E o <code>aria-label</code> vem junto — tooltip não substitui.</td></tr>
+        <tr><td>Delay</td><td>400ms no hover, imediato no foco por teclado. ESC fecha. Sem seta: instrumento não precisa de balãozinho.</td></tr>
+        <tr><td>Máximo 40ch</td><td>Se não cabe, não era tooltip: era conteúdo de painel ou de diálogo.</td></tr>
+        <tr><td>Número em mono</td><td>Todo dado dentro do tooltip segue a mesma regra do resto — Space Mono, tabular-nums.</td></tr>
+      </table>
+    </section>
+
+    <!-- Diálogo -->
+    <section class="doc-section" id="c-dialog">
+      <h3 class="sub-title">Diálogo &amp; a proibição de snackbar</h3>
+
+      <div class="rule forbid">
+        <span class="rule-tag"><i class="ph-bold ph-prohibit icon-14"></i>Proibido</span>
+        <p><strong>Snackbar e toast não existem neste sistema.</strong> Mensagem que some sozinha não é
+        confirmação: durante um incidente o operador está lendo outra parte da tela, e o resultado da
+        ação — que é o dado mais importante do momento — evapora em três segundos sem deixar rastro.
+        Nada que confirme, avise ou explique um resultado desaparece por conta própria.</p>
+      </div>
+
+      <div class="rule adopt">
+        <span class="rule-tag"><i class="ph-bold ph-check-circle icon-14"></i>No lugar</span>
+        <p>Resultado de ação vai para <strong>diálogo</strong>, quando precisa ser lido, ou para a
+        <strong>própria tela</strong>, quando o dado já conta a história. Feedback vive onde o operador
+        já está olhando e permanece até ele decidir o contrário.</p>
+      </div>
+
+      <table class="spec-table">
+        <tr><th>Era snackbar</th><th>Vira</th></tr>
+        <tr><td>"Correção aplicada."</td><td>A linha da tabela muda de <em>Critical</em> para <em>Healthy</em>, e o card de insight some. O dado é a confirmação.</td></tr>
+        <tr><td>"Falha ao aplicar."</td><td>Diálogo de erro com a causa em uma frase e a ação de tentar de novo. Erro não pode ser perdido por distração.</td></tr>
+        <tr><td>"Copiado."</td><td>Inline no próprio botão: o ícone vira <code>ph-check</code> por 1,4s e volta. É a única exceção temporária, porque não carrega informação.</td></tr>
+        <tr><td>"3 itens selecionados."</td><td>Barra de seleção persistente no topo da lista, com as ações em lote. Estado, não aviso.</td></tr>
+        <tr><td>"Salvo automaticamente."</td><td>Metadado no cabeçalho do painel: <code>salvo há 4s</code>, em mono. Silencioso e verificável.</td></tr>
+      </table>
+
+      <h3 class="sub-title">Diálogo de confirmação</h3>
+      <div class="dialog-stage">
+        <div class="dialog">
+          <p class="dialog-title">Aplicar correção em payments-api?</p>
+          <p class="dialog-body">O limite de memória sobe de <span style="font-family:var(--font-mono)">512Mi</span> para
+          <span style="font-family:var(--font-mono)">896Mi</span>. Os 6 pods reiniciam em rolling update.
+          Estimativa de <span style="font-family:var(--font-mono); color:var(--action)">+$310/mo</span> em custo.</p>
+          <div class="dialog-foot">
+            <button class="btn btn-secondary">Cancelar</button>
+            <button class="btn btn-primary">Aplicar correção</button>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="sub-title">Diálogo destrutivo</h3>
+      <div class="dialog-stage">
+        <div class="dialog" style="border-color:rgba(255,91,79,.4);">
+          <p class="dialog-title">Excluir a política de rightsizing?</p>
+          <p class="dialog-body">14 workloads voltam a rodar sem limite sugerido, e o histórico de
+          recomendação desta política é perdido. Não há como desfazer.</p>
+          <div class="dialog-foot">
+            <button class="btn btn-secondary">Cancelar</button>
+            <button class="btn btn-danger">Excluir política</button>
+          </div>
+        </div>
+      </div>
+
+      <table class="spec-table" style="margin-top:var(--sp-5);">
+        <tr><th>Regra</th><th>Detalhe</th></tr>
+        <tr><td>Largura</td><td><code>440px</code> para confirmação, <code>640px</code> para formulário. Nunca tela cheia no desktop — o contexto atrás precisa continuar visível.</td></tr>
+        <tr><td>Overlay</td><td><code>rgba(8,12,8,.72)</code>, sem blur. Blur apaga o dado de trás, e o dado de trás é o motivo da decisão.</td></tr>
+        <tr><td>Verbo no botão</td><td><code>Excluir política</code>, nunca <code>OK</code> ou <code>Confirmar</code>. O botão repete a ação, para que quem leu só o rodapé ainda saiba o que vai acontecer.</td></tr>
+        <tr><td>Ordem das ações</td><td>Secundária à esquerda, primária à direita. Em diálogo destrutivo a primária usa <code>--critical</code> — é o único lugar onde crítico vira cor de botão.</td></tr>
+        <tr><td>Consequência, não pergunta</td><td>O corpo diz o que vai mudar em número: quantos pods reiniciam, quanto custa, o que se perde. "Tem certeza?" não é informação.</td></tr>
+        <tr><td>Foco</td><td>Vai para o primeiro elemento interativo, fica preso dentro do diálogo, ESC fecha, e ao fechar volta para o gatilho.</td></tr>
+        <tr><td>Nunca empilhar</td><td>Um diálogo por vez. Diálogo que abre diálogo é fluxo que precisava ser uma tela.</td></tr>
+        <tr><td>Erro em diálogo</td><td>Segue a regra dos 5 estados: explica o que quebrou em linguagem da interface. Erro cru de API vai para o painel de detalhe técnico, recolhido.</td></tr>
+      </table>
+    </section>
+
+    <!-- Tabela -->
+    <section class="doc-section" id="c-tabela">
+      <p class="section-eyebrow">04 · Padrão de dado</p>
+      <h2 class="section-title">Tabela / lista densa</h2>
+      <p class="section-intro">Texto alinhado à esquerda, número sempre à direita em <code style="font-family:var(--font-mono); background:var(--bg-raised); padding:1px 6px; border-radius:2px; color:var(--action);">tabular-nums</code>.
+      Em <code style="font-family:var(--font-mono); background:var(--bg-raised); padding:1px 6px; border-radius:2px; color:var(--action);">console-compact</code>,
+      colunas secundárias somem antes de quebrar o layout — nunca scroll horizontal escondido.</p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Workload</th><th>Namespace</th><th>Estado</th><th class="num">p99</th><th class="num">Custo/mês</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="row-name">payments-api</span><span class="row-sub">6 pods</span></td>
+            <td>payments</td>
+            <td><span class="badge critical"><span class="badge-dot"></span>Critical</span></td>
+            <td class="num">142ms</td>
+            <td class="num">$4,280</td>
+          </tr>
+          <tr>
+            <td><span class="row-name">checkout-api</span><span class="row-sub">12 pods</span></td>
+            <td>checkout</td>
+            <td><span class="badge healthy"><span class="badge-dot"></span>Healthy</span></td>
+            <td class="num">38ms</td>
+            <td class="num">$1,120</td>
+          </tr>
+          <tr>
+            <td><span class="row-name">inventory-sync</span><span class="row-sub">3 pods</span></td>
+            <td>inventory</td>
+            <td><span class="badge warning"><span class="badge-dot"></span>Degraded</span></td>
+            <td class="num">910ms</td>
+            <td class="num">$640</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+
+    <!-- Gráficos -->
+    <section class="doc-section" id="c-grafico">
+      <h2 class="section-title">Gráficos</h2>
+      <p class="section-intro">Um gráfico responde a <strong>uma</strong> pergunta. Se precisa de dois
+      eixos Y, são dois gráficos. E o princípio de cor vale aqui com mais força que em qualquer outro
+      lugar: a série tem cor de <strong>identidade</strong>, o significado entra por marcação desenhada
+      por cima — limite, faixa de incidente, marco de deploy. Linha que muda de cor ao piorar destrói a
+      leitura de "cor é informação", porque aí duas coisas diferentes usam o mesmo canal.</p>
+
+      <div class="chart-panel">
+        <div class="chart-head">
+          <p class="chart-title">Latência p99 · última hora</p>
+          <div class="chart-legend">
+            <span class="legend-item"><span class="legend-key" style="background:var(--series-1)"></span>payments-api <span class="legend-val">142ms</span></span>
+            <span class="legend-item"><span class="legend-key" style="background:var(--series-2)"></span>checkout-api <span class="legend-val">32ms</span></span>
+          </div>
+        </div>
+        <div class="chart">
+          <svg viewBox="0 0 720 200" role="img" aria-label="Latência p99 de payments-api e checkout-api na última hora, com pico de 180ms às 12h45 acima do limite de 150ms">
+            <!-- faixa de incidente -->
+            <rect x="344.4" y="16" width="118.5" height="160" fill="var(--critical)" opacity=".08"></rect>
+            <!-- grid horizontal -->
+            <g stroke="var(--grid)" stroke-width="1">
+              <line x1="48" y1="16" x2="700" y2="16"></line>
+              <line x1="48" y1="56" x2="700" y2="56"></line>
+              <line x1="48" y1="96" x2="700" y2="96"></line>
+              <line x1="48" y1="136" x2="700" y2="136"></line>
+              <line x1="48" y1="176" x2="700" y2="176" stroke="var(--border)"></line>
+            </g>
+            <!-- rótulos de eixo Y -->
+            <g class="chart-axis" text-anchor="end">
+              <text x="40" y="19">200</text><text x="40" y="59">150</text>
+              <text x="40" y="99">100</text><text x="40" y="139">50</text><text x="40" y="179">0</text>
+            </g>
+            <!-- limite -->
+            <line x1="48" y1="56" x2="700" y2="56" stroke="var(--critical)" stroke-width="1" stroke-dasharray="4 4"></line>
+            <text class="chart-axis" x="700" y="51" text-anchor="end" fill="var(--critical)">SLO 150ms</text>
+            <!-- marco de deploy -->
+            <line x1="285.1" y1="16" x2="285.1" y2="176" stroke="var(--info)" stroke-width="1" stroke-dasharray="2 3"></line>
+            <text class="chart-axis" x="289" y="26" fill="var(--info)">deploy v2.4.1</text>
+            <!-- área + linha série 1 -->
+            <polygon points="48,142.4 107.3,140 166.5,140.8 225.8,137.6 285.1,134.4 344.4,80 403.6,32 462.9,62.4 522.2,99.2 581.5,128 640.7,136 700,138.4 700,176 48,176" fill="var(--series-1)" opacity=".12"></polygon>
+            <polyline points="48,142.4 107.3,140 166.5,140.8 225.8,137.6 285.1,134.4 344.4,80 403.6,32 462.9,62.4 522.2,99.2 581.5,128 640.7,136 700,138.4" fill="none" stroke="var(--series-1)" stroke-width="1.5" stroke-linejoin="round"></polyline>
+            <!-- linha série 2 -->
+            <polyline points="48,152 107.3,150.4 166.5,151.2 225.8,149.6 285.1,148 344.4,145.6 403.6,144 462.9,145.6 522.2,147.2 581.5,148.8 640.7,149.6 700,150.4" fill="none" stroke="var(--series-2)" stroke-width="1.5" stroke-linejoin="round"></polyline>
+            <!-- último valor -->
+            <circle cx="700" cy="138.4" r="3" fill="var(--series-1)"></circle>
+            <circle cx="700" cy="150.4" r="3" fill="var(--series-2)"></circle>
+            <!-- rótulos de eixo X -->
+            <g class="chart-axis" text-anchor="middle">
+              <text x="48" y="193">12:00</text><text x="166.5" y="193">12:15</text>
+              <text x="285.1" y="193">12:30</text><text x="403.6" y="193">12:45</text>
+              <text x="522.2" y="193">13:00</text><text x="640.7" y="193">13:15</text>
+            </g>
+          </svg>
+        </div>
+        <p class="chart-note">Faixa vermelha marca a janela do incidente, tracejado marca o SLO, linha
+        azul marca o deploy. As duas séries mantêm a cor delas o tempo todo.</p>
+      </div>
+
+      <h3 class="sub-title">Tipos permitidos</h3>
+      <table class="spec-table">
+        <tr><th>Tipo</th><th>Pergunta que responde</th></tr>
+        <tr><td>Linha</td><td>Como isso mudou no tempo. É o padrão de toda telemetria.</td></tr>
+        <tr><td>Área empilhada</td><td>Como a composição mudou no tempo — custo por namespace, requests por status.</td></tr>
+        <tr><td>Barra horizontal</td><td>Quem é maior. Ranking e comparação categórica; horizontal porque nome de workload é longo.</td></tr>
+        <tr><td>Heatmap</td><td>Onde a densidade se concentra — hora × dia, pod × nó.</td></tr>
+        <tr><td>Sparkline</td><td>Tendência dentro de uma linha de tabela, sempre acompanhada do número.</td></tr>
+      </table>
+
+      <div class="rule forbid">
+        <span class="rule-tag"><i class="ph-bold ph-prohibit icon-14"></i>Proibido</span>
+        <p><strong>Pizza, donut, gauge, 3D e eixo Y duplo.</strong> Os três primeiros pedem para comparar
+        ângulo e área, que o olho lê mal; o 3D distorce; o eixo duplo deixa qualquer par de séries
+        parecer correlacionado por escolha de escala. Nenhum deles sobrevive ao princípio de precisão
+        de instrumento.</p>
+      </div>
+
+      <h3 class="sub-title">Anatomia</h3>
+      <table class="spec-table">
+        <tr><th>Elemento</th><th>Regra</th></tr>
+        <tr><td>Eixo e rótulo</td><td>Space Mono <code>9,5–11px</code> em <code>--text-tertiary</code>, tabular-nums. Eixo Y à esquerda, alinhado à direita.</td></tr>
+        <tr><td>Grid</td><td>1px em <code>--grid</code>, só horizontal. Vertical apenas onde existe marcação (deploy, janela). Linha de base do zero em <code>--border</code>.</td></tr>
+        <tr><td>Linha</td><td>1,5px, junta arredondada, sem sombra. Curva suave só em série contínua; contador usa degrau, porque interpolar contador inventa dado.</td></tr>
+        <tr><td>Área</td><td>Preenchimento da própria série a <code>12%</code>. Nunca gradiente — gradiente sugere uma segunda dimensão que não existe.</td></tr>
+        <tr><td>Ponto</td><td>Só no último valor e no hover. Ponto em todo vértice vira ruído com mais de 30 amostras.</td></tr>
+        <tr><td>Eixo Y</td><td>Começa em zero em barra e área, sempre. Em linha de latência pode cortar — mas então anota o corte, não deixa o leitor supor.</td></tr>
+        <tr><td>Legenda</td><td>Acima do gráfico, horizontal, mono caixa alta, com o <strong>valor atual</strong> de cada série à direita do nome. Legenda sem número obriga a passar o mouse para saber onde se está.</td></tr>
+        <tr><td>Tooltip</td><td>Segue o cursor, mostra todas as séries daquele instante ordenadas por valor, com o timestamp em mono no topo.</td></tr>
+        <tr><td>Sem dado</td><td>Não desenha eixo vazio: usa o estado vazio da seção 03, dentro do mesmo painel.</td></tr>
+        <tr><td>Dado parcial</td><td>Trecho sem coleta fica com a linha interrompida, nunca interpolada, e o painel ganha a nota de estado parcial.</td></tr>
+      </table>
+
+      <h3 class="sub-title">Marcação semântica</h3>
+      <p class="section-intro">É aqui — e só aqui — que a cor semântica entra num gráfico.</p>
+      <table class="spec-table">
+        <tr><th>Marcação</th><th>Desenho</th></tr>
+        <tr><td>Limite / SLO</td><td>Linha horizontal tracejada 1px em <code>--critical</code>, com rótulo no fim da linha.</td></tr>
+        <tr><td>Janela de incidente</td><td>Faixa vertical em <code>--critical</code> a <code>8%</code>, atrás das séries.</td></tr>
+        <tr><td>Deploy / evento</td><td>Linha vertical pontilhada 1px em <code>--info</code>, com rótulo curto no topo.</td></tr>
+        <tr><td>Faixa saudável</td><td>Não se desenha. Saudável não tem cor — o que se marca é o desvio.</td></tr>
+      </table>
+
+      <h3 class="sub-title">Acima de cinco séries</h3>
+      <p class="section-intro">A paleta tem seis cores e a sexta é <code>--series-rest</code>, cinza:
+      da sexta série em diante tudo vira <strong>Outros</strong>, agregado. Não é limitação de paleta, é
+      leitura — ninguém distingue oito linhas coloridas num gráfico de 200px de altura, e fingir que sim
+      é decorar com cor.</p>
+
+      <h3 class="sub-title">Sparkline</h3>
+      <p class="section-intro">Sem eixo, sem grid, sem legenda, 24px de altura, traço de 1px.
+      <strong>Nunca aparece sem o número ao lado</strong>: sozinha ela mostra formato e esconde escala,
+      que é exatamente o oposto de precisão de instrumento.</p>
+      <div class="panel">
+        <div class="spark-row">
+          <span class="spark-name">payments-api</span>
+          <svg viewBox="0 0 100 24" preserveAspectRatio="none"><polyline points="0,18 9,17 18,17 27,16 36,15 45,6 55,2 64,8 73,12 82,16 91,17 100,17" fill="none" stroke="var(--series-1)" stroke-width="1" vector-effect="non-scaling-stroke"></polyline></svg>
+          <span class="spark-val">142ms</span>
+        </div>
+        <div class="spark-row">
+          <span class="spark-name">checkout-api</span>
+          <svg viewBox="0 0 100 24" preserveAspectRatio="none"><polyline points="0,20 9,19 18,20 27,19 36,18 45,17 55,16 64,17 73,18 82,19 91,19 100,19" fill="none" stroke="var(--series-2)" stroke-width="1" vector-effect="non-scaling-stroke"></polyline></svg>
+          <span class="spark-val">32ms</span>
+        </div>
+        <div class="spark-row">
+          <span class="spark-name">inventory-sync</span>
+          <svg viewBox="0 0 100 24" preserveAspectRatio="none"><polyline points="0,14 9,13 18,15 27,12 36,10 45,11 55,9 64,7 73,6 82,4 91,3 100,2" fill="none" stroke="var(--series-3)" stroke-width="1" vector-effect="non-scaling-stroke"></polyline></svg>
+          <span class="spark-val">910ms</span>
+        </div>
+      </div>
+
+      <h3 class="sub-title">Acessibilidade</h3>
+      <table class="spec-table">
+        <tr><th>Regra</th><th>Como se manifesta</th></tr>
+        <tr><td>Nunca só por cor</td><td>Toda série tem nome na legenda e no tooltip. Em preto-e-branco o gráfico continua legível pela legenda ordenada e pelos valores.</td></tr>
+        <tr><td>Alternativa textual</td><td><code>role="img"</code> com <code>aria-label</code> descrevendo tendência, pico e violação de limite — não "gráfico de latência".</td></tr>
+        <tr><td>Tabela por trás</td><td>Todo gráfico tem os mesmos dados alcançáveis como tabela densa, nem que seja recolhida abaixo dele.</td></tr>
+        <tr><td>Teclado</td><td>O gráfico recebe foco; setas percorrem os pontos e anunciam valor e timestamp.</td></tr>
+      </table>
+    </section>
+
+    <!-- Vazio e erro -->
+    <section class="doc-section" id="c-vazio-erro">
+      <h3 class="sub-title" style="margin-top:0;">Estado vazio</h3>
+      <div class="state-block empty">
+        <div class="state-block-icon">·</div>
+        <h4>Nenhum alerta nas últimas 24h</h4>
+        <p>Quando um workload sair da faixa esperada, ele aparece aqui.</p>
+        <button class="btn btn-secondary">Ver histórico completo</button>
+      </div>
+
+      <h3 class="sub-title">Estado de erro</h3>
+      <div class="state-block error">
+        <div class="state-block-icon">!</div>
+        <h4>Não foi possível carregar os workloads</h4>
+        <p>A conexão com o cluster falhou. Verifique a rede ou tente de novo.</p>
+        <button class="btn btn-secondary">Tentar de novo</button>
+      </div>
+    </section>
+
+    <!-- Skeleton -->
+    <section class="doc-section" id="c-skeleton">
+      <h3 class="sub-title" style="margin-top:0;">Skeleton</h3>
+      <p class="section-intro">Ocupa a forma real do conteúdo — nunca um spinner central de tela cheia.</p>
+      <div class="panel" style="max-width:420px;">
+        <div class="skel skel-line w-40" style="height:16px;"></div>
+        <div class="skel skel-line w-90"></div>
+        <div class="skel skel-line w-60"></div>
+      </div>
+    </section>
+
+    <!-- Mock banner -->
+    <section class="doc-section" id="c-mock">
+      <h3 class="sub-title" style="margin-top:0;">Banner de dado não-real</h3>
+      <p class="section-intro">Uso info (azul), nunca warning ou critical — não é um problema do
+      sistema, é uma marca de proveniência do dado. Textura diagonal reforça a leitura mesmo em
+      screenshot preto-e-branco; o texto garante que a regra "cor + palavra" continue valendo.</p>
+      <div class="mock-banner">
+        <span class="mock-banner-tag">Amostra</span>
+        <span>Este painel mostra dado simulado — a integração com o cluster ainda não está conectada.</span>
+      </div>
+    </section>
+
+    <!-- Microcopy -->
+    <section class="doc-section" id="microcopy">
+      <p class="section-eyebrow">05 · Escrita</p>
+      <h2 class="section-title">Microcopy</h2>
+      <p class="section-intro">Frase curta, verbo ativo, fala do problema do operador — nunca da
+      feature.</p>
+
+      <div class="copy-pair">
+        <div class="copy-bad"><span class="copy-tag">Evite</span><span class="copy-text">"Ocorreu um erro ao processar sua solicitação."</span></div>
+        <div class="copy-good"><span class="copy-tag">Use</span><span class="copy-text">"Não foi possível aplicar a correção. Tente de novo."</span></div>
+      </div>
+      <div class="copy-pair">
+        <div class="copy-bad"><span class="copy-tag">Evite</span><span class="copy-text">"Nenhum dado disponível no momento."</span></div>
+        <div class="copy-good"><span class="copy-tag">Use</span><span class="copy-text">"Nenhum alerta nas últimas 24h."</span></div>
+      </div>
+      <div class="copy-pair">
+        <div class="copy-bad"><span class="copy-tag">Evite</span><span class="copy-text">"Sua solicitação foi enviada com sucesso!"</span></div>
+        <div class="copy-good"><span class="copy-tag">Use</span><span class="copy-text">"Correção aplicada."</span></div>
+      </div>
+    </section>
+
+    <!-- Acessibilidade -->
+    <section class="doc-section" id="acessibilidade">
+      <p class="section-eyebrow">06 · Acesso</p>
+      <h2 class="section-title">Acessibilidade operacional</h2>
+      <table class="spec-table">
+        <thead><tr><th>Regra</th><th>Como se manifesta aqui</th></tr></thead>
+        <tbody>
+          <tr><td>Foco visível</td><td>Contorno de 2px em <code>--action</code> em todo elemento interativo — nunca <code>outline:none</code> sem substituto.</td></tr>
+          <tr><td>Navegação por teclado</td><td>Ordem de foco segue a ordem visual; toda ação alcançável sem mouse.</td></tr>
+          <tr><td>Cor + palavra</td><td>Nenhum estado (badge, borda, ícone) comunica só por cor.</td></tr>
+          <tr><td>Alvo de clique</td><td>Mínimo 40×40px em botão, linha de tabela e item de navegação.</td></tr>
+          <tr><td>Semantics</td><td>Elemento que comunica estado (badge, banner, skeleton) expõe rótulo textual equivalente para leitor de tela.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <footer class="doc-footer">
+      Immuno Ops · Design System de Produto v1.1
+    </footer>
+
+  </main>
+</div>
+
+<script>
+// swatches de cor — clique para copiar
+const palettes = {
+  'sw-surface': [
+    ['Ink','#080C08','--bg','Fundo principal. É a tinta da marca: todo o resto assenta sobre ela.'],
+    ['Ink Raised','#0E140E','--bg-raised','Cards, painéis, linha de tabela em hover'],
+    ['Ink Header','#131B13','--bg-header','Cabeçalho de tabela, sidebar, menu'],
+    ['Line','#1E2A1E','--border','Bordas e divisórias'],
+    ['Line Strong','#2C3D2C','--border-strong','Borda de campo, ênfase, tracejado de estado'],
+  ],
+  'sw-text': [
+    ['White','#FFFFFF','--text','Texto principal'],
+    ['Muted','#8FA893','--text-secondary','Texto corrido secundário'],
+    ['Dim','#5C7060','--text-tertiary','Legenda e rótulo'],
+  ],
+  'sw-action': [
+    ['Green Ink','#00FF41','--action','Ação primária e a cor da marca'],
+    ['Green Deep','#00CC33','--action-hover','Hover e estado active da ação'],
+    ['On Green','#080C08','--on-action','Texto e ícone sobre verde. É o mesmo Ink do fundo.'],
+  ],
+  'sw-series': [
+    ['Série 1','#58C7F3','--series-1','Primeira série de qualquer gráfico'],
+    ['Série 2','#7C83F7','--series-2','Segunda série'],
+    ['Série 3','#C77DFF','--series-3','Terceira série'],
+    ['Série 4','#5FD3A6','--series-4','Quarta série'],
+    ['Série 5','#F07AB0','--series-5','Quinta série'],
+    ['Outros','#4A5C4E','--series-rest','Agregado, da sexta série em diante'],
+  ],
+  'sw-state': [
+    ['Healthy','#5C7060','--healthy','Saudável — neutro, nunca verde'],
+    ['Warning','#FFB020','--warning','Degradado'],
+    ['Critical','#FF5B4F','--critical','Incidente'],
+    ['Info','#35D6FF','--info','Evento neutro, deploy, dado não-real'],
+  ],
+};
+for (const [id, items] of Object.entries(palettes)){
+  const el = document.getElementById(id);
+  if(!el) continue;
+  el.innerHTML = items.map(([name,hex,token,use]) => `
+    <button class="swatch" data-hex="${hex}">
+      <div class="swatch-fill" style="background:${hex}"></div>
+      <div class="swatch-body">
+        <p class="swatch-name">${name}</p>
+        <code class="swatch-token">${token}</code>
+        <p class="swatch-hex">${hex}</p>
+        <p class="swatch-use">${use}</p>
+      </div>
+    </button>`).join('');
+}
+document.querySelectorAll('.swatch').forEach(btn => {
+  btn.addEventListener('click', () => {
+    navigator.clipboard?.writeText(btn.dataset.hex).catch(()=>{});
+    btn.classList.add('copied');
+    setTimeout(()=>btn.classList.remove('copied'), 1400);
+  });
+});
+
+// escala de espaçamento
+const spaceScale = [
+  ['sp-1','4px',4],['sp-2','8px',8],['sp-3','12px',12],['sp-4','16px',16],
+  ['sp-5','24px',24],['sp-6','32px',32],['sp-7','48px',48],['sp-8','64px',64],
+];
+document.getElementById('scale-space').innerHTML = spaceScale.map(([name,val,px]) => `
+  <div class="scale-row">
+    <span class="scale-name">${name}</span>
+    <span class="scale-bar" style="width:${px*2}px"></span>
+    <span class="scale-val">${val}</span>
+  </div>`).join('');
+
+// scroll-spy simples na sidebar
+const links = Array.from(document.querySelectorAll('.nav-link'));
+const targets = links.map(l => document.querySelector(l.getAttribute('href'))).filter(Boolean);
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if(entry.isIntersecting){
+      const id = '#' + entry.target.id;
+      links.forEach(l => l.classList.toggle('is-active', l.getAttribute('href') === id));
+    }
+  });
+}, { rootMargin: '-10% 0px -70% 0px' });
+targets.forEach(t => io.observe(t));
+</script>
+</body>
+</html>
